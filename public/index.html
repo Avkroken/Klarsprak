@@ -258,7 +258,11 @@
     .lede { font-size: 1.08rem; }
     .status-note { font-size: 0.95rem; }
 
-    .controls { gap: 0.5rem; padding: 0.9rem 0 0.9rem; }
+    .controls {
+      position: static; /* sticky kändes som ett löst, oförankrat element som "följde med" mitt på skärmen utan tydlig verktygsfälts-avgränsning */
+      gap: 0.5rem;
+      padding: 0.9rem 0 0.9rem;
+    }
     #search {
       font-size: 1rem;
       padding: 0.9rem 1.1rem;
