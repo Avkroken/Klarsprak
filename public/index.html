@@ -1,5 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Klarspråk — juridik till vardagsspråk</title>
 <style>
   :root {
@@ -257,8 +258,26 @@
     .lede { font-size: 1.08rem; }
     .status-note { font-size: 0.95rem; }
 
-    #search { font-size: 1rem; padding: 0.85rem 1rem; }
-    .filter-btn { font-size: 0.88rem; padding: 0.6rem 0.95rem; }
+    .controls { gap: 0.5rem; padding: 0.9rem 0 0.9rem; }
+    #search {
+      font-size: 1rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 999px;
+      border-width: 2px;
+      flex-basis: 100%;
+    }
+    .filters { gap: 0.5rem; width: 100%; overflow-x: auto; padding-bottom: 0.15rem; }
+    .filter-btn {
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      padding: 0.65rem 1.1rem;
+      border-radius: 999px;
+      border-width: 2px;
+      flex: none;
+    }
+    .filter-btn.active { border-color: var(--ink); }
     .count { font-size: 0.92rem; }
 
     .term { font-size: 1.55rem; }
