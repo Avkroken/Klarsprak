@@ -467,7 +467,8 @@
   .field-label .req { color: var(--ochre); }
 
   .field input,
-  .field textarea {
+  .field textarea,
+  .field select {
     font-family: inherit;
     font-size: 0.92rem;
     padding: 0.6rem 0.75rem;
@@ -479,7 +480,8 @@
   }
 
   .field input:focus-visible,
-  .field textarea:focus-visible {
+  .field textarea:focus-visible,
+  .field select:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 1px;
     border-color: var(--focus);
@@ -603,6 +605,12 @@
       <label class="field">
         <span class="field-label">Exempel</span>
         <textarea name="foreslagen_exempel" rows="2" maxlength="2000"></textarea>
+      </label>
+      <label class="field">
+        <span class="field-label">Rättsområde (valfritt)</span>
+        <select name="foreslaget_rattsomrade" id="suggest-area-select">
+          <option value="">Vet ej / annat</option>
+        </select>
       </label>
       <p class="field-hint">Fyll i minst en av vardagsbetydelse eller juridisk definition.</p>
       <label class="field">
@@ -1212,6 +1220,14 @@
   const formError = document.getElementById('form-error');
   const formSuccess = document.getElementById('form-success');
   const submitBtn = document.getElementById('modal-submit');
+  const areaSelect = document.getElementById('suggest-area-select');
+
+  areas.filter(a => a !== 'Alla').forEach(area => {
+    const opt = document.createElement('option');
+    opt.value = area;
+    opt.textContent = area;
+    areaSelect.appendChild(opt);
+  });
 
   function openModal() {
     backdrop.hidden = false;

@@ -323,7 +323,7 @@
       <article class="card" data-id="${item.id}">
         <div class="card-head">
           <h2 class="term">${esc(item.term)}</h2>
-          <span class="meta">#${item.id} · ${esc(item.created_at)}</span>
+          <span class="meta">#${item.id} · ${esc(item.created_at)}${item.foreslaget_rattsomrade ? ' · föreslaget område: ' + esc(item.foreslaget_rattsomrade) : ''}</span>
         </div>
         ${item.foreslagen_vardagsbetydelse ? `<div class="field-block"><span class="field-label">Vardagsbetydelse</span><p>${esc(item.foreslagen_vardagsbetydelse)}</p></div>` : ''}
         ${item.foreslagen_juridisk_definition ? `<div class="field-block"><span class="field-label">Juridisk definition</span><p>${esc(item.foreslagen_juridisk_definition)}</p></div>` : ''}
