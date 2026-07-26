@@ -12,6 +12,7 @@ const MAX_LEN = {
   foreslagen_juridisk_definition: 4000,
   foreslagen_vardagsbetydelse: 4000,
   foreslagen_exempel: 2000,
+  foreslaget_rattsomrade: 100,
   inskickare_namn: 200,
   inskickare_kommentar: 2000,
 };
@@ -110,14 +111,15 @@ async function handleSubmit(request, env) {
   await env.DB.prepare(
     `INSERT INTO submissions
       (term, foreslagen_juridisk_definition, foreslagen_vardagsbetydelse, foreslagen_exempel,
-       inskickare_namn, inskickare_kommentar, status, created_at, submitter_ip)
-     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
+       foreslaget_rattsomrade, inskickare_namn, inskickare_kommentar, status, created_at, submitter_ip)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
   )
     .bind(
       body.term.trim(),
       clean(body.foreslagen_juridisk_definition),
       clean(body.foreslagen_vardagsbetydelse),
       clean(body.foreslagen_exempel),
+      clean(body.foreslaget_rattsomrade),
       clean(body.inskickare_namn),
       clean(body.inskickare_kommentar),
       now,
