@@ -28,6 +28,10 @@ concurrency:
 
 jobs:
   deploy:
+    # Grinden för produktionsdeploy ligger i miljön, inte i den här filen:
+    # deployment branch policy släpper bara main, och CLOUDFLARE_API_TOKEN
+    # är ett environment secret. En körning på dev får därför ingen token.
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
