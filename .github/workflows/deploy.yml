@@ -3,8 +3,9 @@ name: Deploy
 # Auto-deploy till Cloudflare Workers vid push till main. Enkel statisk
 # assets-worker (public/index.html) — inget build-steg, bara wrangler deploy.
 #
-# Secrets (Repo → Settings → Secrets → Actions):
-#   CLOUDFLARE_API_TOKEN     — Workers Scripts:Edit
+# Secrets (Repo → Settings → Environments → produktion):
+#   KLARSPRAK — Cloudflare API-token. Workers Scripts:Edit.
+#     Environment secret på miljön produktion, inte på repo-nivå.
 #
 # Variables (Repo → Settings → Variables → Actions):
 #   CLOUDFLARE_ACCOUNT_ID    — kontots ID. Variabel, inte secret: det är ingen
@@ -15,12 +16,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch: {}
-  schedule:
-    # Säkerhetsnät: auto-merge-boten (Bot Auto-Merge) mergar claude/-PR:ar med
-    # standard-GITHUB_TOKEN, vilket GitHub inte låter trigga push-workflows.
-    # Utan detta blir mergad kod tyst odeployad. wrangler deploy är
-    # idempotent, så en periodisk körning kostar inget om main redan är live.
-    - cron: '*/30 * * * *'
+
+# Standardtokens rättigheter behöver inte vara vidare än checkout:
+# wrangler autentiserar med CLOUDFLARE_API_TOKEN, inte med GITHUB_TOKEN.
+permissions:
+  contents: read
 
 concurrency:
   group: deploy
@@ -29,9 +29,9 @@ concurrency:
 jobs:
   deploy:
     # Grinden för produktionsdeploy ligger i miljön, inte i den här filen:
-    # deployment branch policy släpper bara main, och CLOUDFLARE_API_TOKEN
+    # deployment branch policy släpper bara main, och KLARSPRAK
     # är ett environment secret. En körning på dev får därför ingen token.
-    environment: production
+    environment: produktion
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -41,5 +41,5 @@ jobs:
       - name: Deploy
         run: bunx wrangler deploy
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.KLARSPRAK }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
