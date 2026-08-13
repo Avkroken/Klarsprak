@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    assignees: ["blixten85"]
     directory: "/"
     schedule:
       interval: "weekly"
@@ -11,6 +12,7 @@ updates:
       actions-patch-minor:
         update-types: ["minor", "patch"]
   - package-ecosystem: "npm"
+    assignees: ["blixten85"]
     directory: "/"
     schedule:
       interval: "weekly"
