@@ -17,6 +17,11 @@ on:
     branches: [main]
   workflow_dispatch: {}
 
+# Standardtokens rättigheter behöver inte vara vidare än checkout:
+# wrangler autentiserar med CLOUDFLARE_API_TOKEN, inte med GITHUB_TOKEN.
+permissions:
+  contents: read
+
 concurrency:
   group: deploy
   cancel-in-progress: false
