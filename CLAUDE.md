@@ -21,3 +21,24 @@ politiker.denied.se. Live på klarsprak.denied.se.
 - Innehållet i ordboken är AI-genererat och opublicerat — inte juridiskt
   sakgranskat. Ändra gärna presentation/kod, men flagga tydligt om
   sakinnehållet (termer/definitioner) ändras utan mänsklig juridisk granskning.
+
+## Allowed
+- Committa på dev
+- Modify code
+- Run tests
+- Open PRs
+
+## Forbidden
+- Push directly to main/master
+- Merge PRs
+- Skapa eller ta bort grenar (rulesetet blockerar det)
+- Disable workflows
+- Modify secrets
+- Change GitHub org settings
+
+## Requirements
+- All tests must pass
+- Keep PRs focused
+- Never include unrelated changes
+- Never commit credentials
+- Never force push
