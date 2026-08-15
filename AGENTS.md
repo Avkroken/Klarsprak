@@ -1,18 +1,29 @@
 # klarsprak — AI Agent Guide
 
 Statisk prototyp-webbplats (Cloudflare Worker med assets-binding) som visar en
-ordbok där juridiska/myndighetstermer översätts till vardagssvenska. Komplement
-till politiker.denied.se. Live på klarsprak.denied.se.
+ordbok där juridiska/myndighetstermer översätts till vardagssvenska, med gapet
+mellan vad allmänheten tror och vad termen faktiskt betyder. Komplement till
+politiker.denied.se. Live på klarsprak.denied.se.
 
 ## Conventions
 
-- All kod är en enda statisk HTML-fil (`public/index.html`), ingen
-  build-process.
-- Worker-namn: `klarsprak`. Config i `wrangler.jsonc`.
-- Hemligheter (nycklar, lösenfraser, tokens) lämnar aldrig enheten okrypterade
+- Frontend är statiska HTML-filer (`public/index.html`, `public/admin.html`,
+  inline CSS+JS), ingen build-process.
+- Backend är en riktig Worker (`src/worker.js`) som hanterar `/api/submit`,
+  `/api/admin/queue`, `/api/admin/review/:id` och annars vidarebefordrar till
+  assets-bindingen.
+- Worker-namn: `klarsprak`. Config i `wrangler.jsonc` (assets-binding +
+  D1-binding `DB` mot databasen `klarsprak-db`).
+- Admin-endpoints skyddas i två lager: Cloudflare Access (Zero Trust-app
+  "klarsprak admin (UI + API)", e-postpolicy) blockerar vid edgen, och
+  Worker-koden kräver därutöver bearer-token mot secreten `ADMIN_TOKEN`.
+- Deploy sker via `.github/workflows/deploy.yml` vid push till main.
+- Innehållet i ordboken är AI-genererat och opublicerat — inte juridiskt
+  sakgranskat. Ändra gärna presentation/kod, men flagga tydligt om
+  sakinnehållet (termer/definitioner) ändras utan mänsklig juridisk granskning.
 
 ## Allowed
-- Create branches
+- Committa på dev
 - Modify code
 - Run tests
 - Open PRs
@@ -20,7 +31,7 @@ till politiker.denied.se. Live på klarsprak.denied.se.
 ## Forbidden
 - Push directly to main/master
 - Merge PRs
-- Delete branches
+- Skapa eller ta bort grenar (rulesetet blockerar det)
 - Disable workflows
 - Modify secrets
 - Change GitHub org settings
