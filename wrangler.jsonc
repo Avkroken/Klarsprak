@@ -3,6 +3,18 @@
   "name": "klarsprak",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-01",
+  // Domänen ägs av den här filen, inte av dashboarden. En custom domain som
+  // bara konfigurerats för hand återskapas inte av `wrangler deploy` — och
+  // försvinner den, går sajten ner utan att något i repot ändrats. Exakt det
+  // hände 2026-08-17: workern var deployad och frisk, men klarsprak.denied.se
+  // saknade DNS-post helt (Cloudflare svarade NODATA) och var oåtkomlig.
+  // Samma mönster som politiker-webapp/app/wrangler.jsonc.
+  "routes": [
+    {
+      "pattern": "klarsprak.denied.se",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
