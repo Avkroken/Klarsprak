@@ -31,14 +31,15 @@ politiker.denied.se. Live på klarsprak.denied.se.
 
 ## Allowed
 - Committa på dev
+- Skapa arbetsgrenar för PR:er (`claude/*`)
 - Modify code
 - Run tests
 - Open PRs
 
 ## Forbidden
 - Push directly to main/master
-- Merge PRs
-- Skapa eller ta bort grenar (rulesetet blockerar det)
+- Merge PRs på eget initiativ (be uttryckligen så är det okej)
+- Ta bort grenar
 - Disable workflows
 - Modify secrets
 - Change GitHub org settings
