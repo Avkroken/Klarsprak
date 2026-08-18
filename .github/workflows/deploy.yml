@@ -6,6 +6,9 @@ name: Deploy
 # Secrets (Repo → Settings → Environments → produktion):
 #   KLARSPRAK — Cloudflare API-token. Workers Scripts:Edit.
 #     Environment secret på miljön produktion, inte på repo-nivå.
+#     Har INTE zonbehörighet ("Zone → Workers Routes → Edit"), vilket är
+#     varför wrangler.jsonc saknar en routes-post och varför kontrollen
+#     längre ned finns. Får den behörigheten går båda att ändra tillbaka.
 #
 # Variables (Repo → Settings → Variables → Actions):
 #   CLOUDFLARE_ACCOUNT_ID    — kontots ID. Variabel, inte secret: det är ingen
@@ -43,3 +46,32 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.KLARSPRAK }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Att `wrangler deploy` lyckas betyder att WORKERN finns — inte att
+      # SAJTEN går att nå. Skillnaden är inte teoretisk: 2026-08-17 var
+      # workern deployad och frisk medan klarsprak.denied.se saknade
+      # DNS-post helt och var oåtkomlig i timmar, utan att något i CI
+      # sade ifrån.
+      #
+      # Domänen kan inte ägas av wrangler.jsonc — KLARSPRAK-tokenen saknar
+      # zonbehörighet, se kommentaren där. Det här är kontrollen i stället:
+      # hämta sajten och fail:a om den inte svarar 200.
+      #
+      # Fem försök med paus emellan, för DNS och edge-propagering tar en
+      # stund efter en nydeployad domän. Det är väntetid, inte flakighet —
+      # ett enda försök hade gjort steget opålitligt av fel skäl.
+      - name: Kontrollera att sajten svarar
+        run: |
+          set -uo pipefail
+          url="https://klarsprak.denied.se/"
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "$url svarade 200 (försök $attempt)"
+              exit 0
+            fi
+            echo "försök $attempt: $url svarade $code"
+            sleep 10
+          done
+          echo "::error::$url svarade aldrig 200 efter deploy — sajten är nere även om workern laddades upp"
+          exit 1

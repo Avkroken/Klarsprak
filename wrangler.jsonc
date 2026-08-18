@@ -3,32 +3,39 @@
   "name": "klarsprak",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-01",
-  // Domänen ägs av den här filen, inte av dashboarden. En custom domain som
-  // bara konfigurerats för hand återskapas inte av `wrangler deploy` — och
-  // försvinner den, går sajten ner utan att något i repot ändrats. Exakt det
-  // hände 2026-08-17: workern var deployad och frisk, men klarsprak.denied.se
-  // saknade DNS-post helt (Cloudflare svarade NODATA) och var oåtkomlig.
-  // Samma mönster som politiker-webapp/app/wrangler.jsonc.
-  "routes": [
-    {
-      "pattern": "klarsprak.denied.se",
-      "custom_domain": true
-    }
-    // klarspråk.denied.se (punycode xn--klarsprk-g0a.denied.se) SKA ligga
-    // här, men går inte att lägga till förrän API-token KLARSPRAK får
-    // behörighet till zonens routes. Försöket 2026-08-18 deployade workern
-    // men föll på sista steget:
-    //
-    //   /zones/…/workers/routes failed. Authentication error [code: 10000]
-    //
-    // Tokenen behöver "Zone → Workers Routes → Edit" på denied.se (utöver
-    // Account → Workers Scripts → Edit som den redan har). När det är satt:
-    // lägg tillbaka posten nedan, så skapar deployen både routen och
-    // DNS-posten. Redirect-koden i worker.js ligger redan på plats och är
-    // verkningslös tills dess.
-    //
-    //   { "pattern": "xn--klarsprk-g0a.denied.se", "custom_domain": true }
-  ],
+  // INGEN "routes" här, och det är ett medvetet val med en obehaglig
+  // baksida — läs hela stycket innan du lägger tillbaka den.
+  //
+  // Domänen BORDE ägas av den här filen. En custom domain som bara
+  // konfigurerats för hand återskapas inte av `wrangler deploy`, och
+  // försvinner den går sajten ner utan att något i repot ändrats. Exakt
+  // det hände 2026-08-17: workern var deployad och frisk, men
+  // klarsprak.denied.se saknade DNS-post helt (Cloudflare svarade NODATA).
+  //
+  // Men API-token KLARSPRAK har bara "Account → Workers Scripts → Edit".
+  // Varje routeoperation går mot zonens API, och den svarar:
+  //
+  //   /zones/9b017d0f…/workers/routes failed. Authentication error [code: 10000]
+  //
+  // Med en routes-post blev därför VARJE deploy röd — workern laddades upp
+  // felfritt ("Uploaded klarsprak"), men jobbet föll på sista steget. En
+  // deploy som alltid är röd är värre än ingen kontroll alls: den lär folk
+  // att ignorera rött, och då syns inte nästa riktiga fel heller.
+  //
+  // Skyddet ligger i stället i deploy.yml, som hämtar sajten efter varje
+  // deploy och failar om den inte svarar 200. Det fångar exakt det som
+  // faktiskt hände (domänen borta → sajten nere) och kräver noll extra
+  // behörigheter.
+  //
+  // NÄR tokenen fått "Zone → Workers Routes → Edit" på denied.se: lägg
+  // tillbaka blocket nedan. Då äger repot både routen och DNS-posten, och
+  // IDN-aliaset går att lägga till på samma gång. Redirect-koden för det
+  // ligger redan i worker.js och är verkningslös tills dess.
+  //
+  //   "routes": [
+  //     { "pattern": "klarsprak.denied.se", "custom_domain": true },
+  //     { "pattern": "xn--klarsprk-g0a.denied.se", "custom_domain": true }
+  //   ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
