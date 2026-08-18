@@ -14,9 +14,16 @@ politiker.denied.se. Live på klarsprak.denied.se.
   assets-bindingen.
 - Worker-namn: `klarsprak`. Config i `wrangler.jsonc` (assets-binding +
   D1-binding `DB` mot databasen `klarsprak-db`).
-- Admin-endpoints skyddas i två lager: Cloudflare Access (Zero Trust-app
-  "klarsprak admin (UI + API)", e-postpolicy) blockerar vid edgen, och
-  Worker-koden kräver därutöver bearer-token mot secreten `ADMIN_TOKEN`.
+- Admin-endpoints skyddades tänkt i två lager: Cloudflare Access (Zero
+  Trust-app "klarsprak admin (UI + API)", e-postpolicy) vid edgen, och
+  Worker-koden med bearer-token mot secreten `ADMIN_TOKEN`.
+  **Uppmätt 2026-08-17: bara det andra lagret är aktivt.** `GET /admin`
+  svarar 200 utan Access-utmaning — ingen redirect till
+  `*.cloudflareaccess.com`, inga `cf-access`-headers. `GET
+  /api/admin/queue` svarar däremot korrekt 401, så DATA är skyddat;
+  det som ligger öppet är admin-sidans HTML-skal.
+  Innan någon lutar sig mot edge-lagret igen: verifiera det med ett
+  faktiskt anrop, inte mot den här filen.
 - Deploy sker via `.github/workflows/deploy.yml` vid push till main.
 - Innehållet i ordboken är AI-genererat och opublicerat — inte juridiskt
   sakgranskat. Ändra gärna presentation/kod, men flagga tydligt om

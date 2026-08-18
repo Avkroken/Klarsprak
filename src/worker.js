@@ -7,6 +7,11 @@
 //   POST /api/admin/review/:id       skyddat (Bearer ADMIN_TOKEN), approve/reject
 //   allt annat                       vidarebefordras till ASSETS-binding
 
+// Sajtens kanoniska värdnamn, och IDN-aliaset som pekar hit. Se
+// wrangler.jsonc: båda är custom domains på samma Worker.
+const CANONICAL_HOST = "klarsprak.denied.se";
+const CANONICAL_ALIAS_HOST = "xn--klarsprk-g0a.denied.se";
+
 const MAX_LEN = {
   term: 200,
   foreslagen_juridisk_definition: 4000,
@@ -181,6 +186,15 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const { pathname } = url;
+
+    // klarspråk.denied.se (punycode xn--klarsprk-g0a) pekar på samma Worker,
+    // men ska inte SERVERA innehållet — två värdnamn för samma sajt splittrar
+    // cookies, sessioner och delade länkar, och ger dubbletter i sökindex.
+    // 301 till ASCII-namnet, med sökväg och query bevarade.
+    if (url.hostname === CANONICAL_ALIAS_HOST) {
+      url.hostname = CANONICAL_HOST;
+      return Response.redirect(url.toString(), 301);
+    }
 
     if (request.method === "POST" && pathname === "/api/submit") {
       return handleSubmit(request, env);
