@@ -3,6 +3,32 @@
   "name": "klarsprak",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-01",
+  // Domänen ägs av den här filen, inte av dashboarden. En custom domain som
+  // bara konfigurerats för hand återskapas inte av `wrangler deploy` — och
+  // försvinner den, går sajten ner utan att något i repot ändrats. Exakt det
+  // hände 2026-08-17: workern var deployad och frisk, men klarsprak.denied.se
+  // saknade DNS-post helt (Cloudflare svarade NODATA) och var oåtkomlig.
+  // Samma mönster som politiker-webapp/app/wrangler.jsonc.
+  "routes": [
+    {
+      "pattern": "klarsprak.denied.se",
+      "custom_domain": true
+    }
+    // klarspråk.denied.se (punycode xn--klarsprk-g0a.denied.se) SKA ligga
+    // här, men går inte att lägga till förrän API-token KLARSPRAK får
+    // behörighet till zonens routes. Försöket 2026-08-18 deployade workern
+    // men föll på sista steget:
+    //
+    //   /zones/…/workers/routes failed. Authentication error [code: 10000]
+    //
+    // Tokenen behöver "Zone → Workers Routes → Edit" på denied.se (utöver
+    // Account → Workers Scripts → Edit som den redan har). När det är satt:
+    // lägg tillbaka posten nedan, så skapar deployen både routen och
+    // DNS-posten. Redirect-koden i worker.js ligger redan på plats och är
+    // verkningslös tills dess.
+    //
+    //   { "pattern": "xn--klarsprk-g0a.denied.se", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
