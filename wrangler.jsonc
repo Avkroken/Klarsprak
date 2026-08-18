@@ -13,6 +13,15 @@
     {
       "pattern": "klarsprak.denied.se",
       "custom_domain": true
+    },
+    {
+      // klarspråk.denied.se i punycode. .se tillåter åäö, och sajten HETER
+      // Klarspråk — folk skriver namnet med å. Utan den här posten fick de
+      // ett uppslagsfel. Servern kanoniserar till ASCII-namnet (301 i
+      // worker.js) så att sessioner, cookies och länkdelning inte splittras
+      // på två värdnamn.
+      "pattern": "xn--klarsprk-g0a.denied.se",
+      "custom_domain": true
     }
   ],
   "assets": {
