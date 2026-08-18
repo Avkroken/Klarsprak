@@ -187,6 +187,9 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
 
+    // INAKTIV tills IDN-routen finns (se wrangler.jsonc): utan custom domain
+    // når inga anrop hit med det värdnamnet. Koden ligger kvar så att
+    // kanoniseringen fungerar direkt den dagen routen läggs till.
     // klarspråk.denied.se (punycode xn--klarsprk-g0a) pekar på samma Worker,
     // men ska inte SERVERA innehållet — två värdnamn för samma sajt splittrar
     // cookies, sessioner och delade länkar, och ger dubbletter i sökindex.
