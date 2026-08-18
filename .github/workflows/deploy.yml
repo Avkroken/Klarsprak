@@ -50,28 +50,57 @@ jobs:
       # Att `wrangler deploy` lyckas betyder att WORKERN finns — inte att
       # SAJTEN går att nå. Skillnaden är inte teoretisk: 2026-08-17 var
       # workern deployad och frisk medan klarsprak.denied.se saknade
-      # DNS-post helt och var oåtkomlig i timmar, utan att något i CI
-      # sade ifrån.
+      # DNS-post helt (Cloudflare svarade NODATA) och var oåtkomlig i
+      # timmar, utan att något i CI sade ifrån.
       #
       # Domänen kan inte ägas av wrangler.jsonc — KLARSPRAK-tokenen saknar
-      # zonbehörighet, se kommentaren där. Det här är kontrollen i stället:
-      # hämta sajten och fail:a om den inte svarar 200.
+      # zonbehörighet, se kommentaren där. Det här är kontrollen i stället.
       #
-      # Fem försök med paus emellan, för DNS och edge-propagering tar en
-      # stund efter en nydeployad domän. Det är väntetid, inte flakighet —
-      # ett enda försök hade gjort steget opålitligt av fel skäl.
-      - name: Kontrollera att sajten svarar
+      # VARFÖR DEN INTE KRÄVER 200: Cloudflares botskydd svarar 403 på
+      # anrop från datacenter-IP:n, och GitHubs runners är just det.
+      # Uppmätt 2026-08-18: fem raka 403 från runnern medan sajten
+      # samtidigt gav 200 från en vanlig klient. En kontroll som kräver
+      # 200 hade alltså failat varje körning av fel skäl — samma fälla som
+      # routes-posten, fast tvärtom.
+      #
+      # Det som FAKTISKT gick sönder 2026-08-17 var att domänen inte fanns:
+      # ingen DNS-post, ingenting att ansluta till. Kontrollen riktar sig
+      # mot exakt det, i två steg som båda är omöjliga att förfalska med
+      # ett WAF-svar:
+      #
+      #   1. domänen ska slå upp till en adress
+      #   2. någon ska svara på HTTPS — vilken statuskod som helst duger
+      #      som bevis på att en edge finns, utom 5xx som betyder att
+      #      edgen finns men är trasig
+      #
+      # Statuskoden skrivs ut oavsett, så en människa ser skillnad på 200
+      # och 403 i loggen utan att jobbet blir rött för det.
+      - name: Kontrollera att domänen lever
         run: |
           set -uo pipefail
-          url="https://klarsprak.denied.se/"
+          host="klarsprak.denied.se"
+
+          if ! getent hosts "$host" > /dev/null; then
+            echo "::error::$host har ingen DNS-post — custom domain-kopplingen är borta, sajten är oåtkomlig"
+            exit 1
+          fi
+          echo "DNS: $(getent hosts "$host" | head -1)"
+
           for attempt in 1 2 3 4 5; do
-            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)
-            if [ "$code" = "200" ]; then
-              echo "$url svarade 200 (försök $attempt)"
-              exit 0
-            fi
-            echo "försök $attempt: $url svarade $code"
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/" || echo 000)
+            case "$code" in
+              000)
+                echo "försök $attempt: ingen HTTPS-respons alls"
+                ;;
+              5*)
+                echo "försök $attempt: edgen svarade $code"
+                ;;
+              *)
+                echo "$host svarade $code — edgen lever (försök $attempt)"
+                exit 0
+                ;;
+            esac
             sleep 10
           done
-          echo "::error::$url svarade aldrig 200 efter deploy — sajten är nere även om workern laddades upp"
+          echo "::error::$host har DNS men ingen fungerande edge efter fem försök"
           exit 1
