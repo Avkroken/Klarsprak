@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Cloudflare Worker & domain check
 
 # Auto-deploy till Cloudflare Workers vid push till main. Enkel statisk
 # assets-worker (public/index.html) — inget build-steg, bara wrangler deploy.
