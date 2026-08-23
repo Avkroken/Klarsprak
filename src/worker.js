@@ -1,14 +1,13 @@
 // klarsprak Worker: serverar statiska assets (public/) och API för
-// community-inlämning + admin-granskning av termförslag.
+// community-inlämning, publicerade termer och admin-granskning.
 //
 // Routes:
+//   GET  /api/terms                  publikt, listar godkända D1-termer
 //   POST /api/submit                 publikt, skriver ett förslag med status "pending"
 //   GET  /api/admin/queue            skyddat (Bearer ADMIN_TOKEN), listar pending
 //   POST /api/admin/review/:id       skyddat (Bearer ADMIN_TOKEN), approve/reject
 //   allt annat                       vidarebefordras till ASSETS-binding
 
-// Sajtens kanoniska värdnamn, och IDN-aliaset som pekar hit. Se
-// wrangler.jsonc: båda är custom domains på samma Worker.
 const CANONICAL_HOST = "klarsprak.denied.se";
 const CANONICAL_ALIAS_HOST = "xn--klarsprk-g0a.denied.se";
 
@@ -50,8 +49,8 @@ function validateSubmission(body) {
 
   const juridisk = clean(body.foreslagen_juridisk_definition);
   const vardag = clean(body.foreslagen_vardagsbetydelse);
-  if (!juridisk && !vardag) {
-    return "Fyll i minst juridisk definition eller vardagsbetydelse.";
+  if (!juridisk || !vardag) {
+    return "Både allmänspråklig betydelse och myndighetens/juridikens användning krävs.";
   }
 
   for (const [key, max] of Object.entries(MAX_LEN)) {
@@ -65,10 +64,10 @@ function validateSubmission(body) {
 }
 
 const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 timme
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 async function isRateLimited(env, ip) {
-  if (!ip) return false; // kan inte spärra det vi inte kan identifiera
+  if (!ip) return false;
   const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
   const { results } = await env.DB.prepare(
     `SELECT COUNT(*) AS n FROM submissions WHERE submitter_ip = ? AND created_at > ?`
@@ -91,6 +90,32 @@ function checkAdminAuth(request, env) {
   const match = auth.match(/^Bearer\s+(.+)$/i);
   if (!match) return false;
   return timingSafeEqual(match[1], env.ADMIN_TOKEN);
+}
+
+async function handleTerms(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, term, foreslagen_vardagsbetydelse, foreslagen_juridisk_definition,
+            foreslagen_exempel, foreslaget_rattsomrade, reviewed_at
+       FROM submissions
+      WHERE status = 'approved'
+      ORDER BY LOWER(term), id`
+  ).all();
+
+  const terms = results.map((row) => ({
+    id: row.id,
+    term: row.term,
+    rattsomrade: row.foreslaget_rattsomrade || "Annat",
+    allmansprak: row.foreslagen_vardagsbetydelse,
+    institution: row.foreslagen_juridisk_definition,
+    kallorOchExempel: row.foreslagen_exempel,
+    publishedAt: row.reviewed_at,
+    source: "community-reviewed",
+  }));
+
+  return json(
+    { terms },
+    { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=300" } }
+  );
 }
 
 async function handleSubmit(request, env) {
@@ -140,9 +165,14 @@ async function handleAdminQueue(request, env) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
   const { results } = await env.DB.prepare(
-    `SELECT * FROM submissions WHERE status = 'pending' ORDER BY created_at ASC`
+    `SELECT id, term, foreslagen_juridisk_definition, foreslagen_vardagsbetydelse,
+            foreslagen_exempel, foreslaget_rattsomrade, inskickare_namn,
+            inskickare_kommentar, created_at
+       FROM submissions
+      WHERE status = 'pending'
+      ORDER BY created_at ASC`
   ).all();
-  return json({ submissions: results });
+  return json({ submissions: results }, { headers: { "cache-control": "no-store" } });
 }
 
 async function handleAdminReview(request, env, id) {
@@ -164,6 +194,22 @@ async function handleAdminReview(request, env, id) {
   if (body?.action !== "approve" && body?.action !== "reject") {
     return badRequest('Fältet "action" måste vara "approve" eller "reject".');
   }
+
+  if (body.action === "approve") {
+    const row = await env.DB.prepare(
+      `SELECT foreslagen_vardagsbetydelse, foreslagen_juridisk_definition
+         FROM submissions WHERE id = ? AND status = 'pending'`
+    )
+      .bind(submissionId)
+      .first();
+    if (!row) {
+      return json({ error: "Förslaget hittades inte eller är redan granskat." }, { status: 404 });
+    }
+    if (!clean(row.foreslagen_vardagsbetydelse) || !clean(row.foreslagen_juridisk_definition)) {
+      return badRequest("Förslag kan inte publiceras utan båda jämförelsedelarna.");
+    }
+  }
+
   const status = body.action === "approve" ? "approved" : "rejected";
   const note = clean(body.note);
   const now = new Date().toISOString();
@@ -179,7 +225,7 @@ async function handleAdminReview(request, env, id) {
     return json({ error: "Förslaget hittades inte eller är redan granskat." }, { status: 404 });
   }
 
-  return json({ ok: true, status });
+  return json({ ok: true, status, published: status === "approved" });
 }
 
 export default {
@@ -187,18 +233,14 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
 
-    // INAKTIV tills IDN-routen finns (se wrangler.jsonc): utan custom domain
-    // når inga anrop hit med det värdnamnet. Koden ligger kvar så att
-    // kanoniseringen fungerar direkt den dagen routen läggs till.
-    // klarspråk.denied.se (punycode xn--klarsprk-g0a) pekar på samma Worker,
-    // men ska inte SERVERA innehållet — två värdnamn för samma sajt splittrar
-    // cookies, sessioner och delade länkar, och ger dubbletter i sökindex.
-    // 301 till ASCII-namnet, med sökväg och query bevarade.
     if (url.hostname === CANONICAL_ALIAS_HOST) {
       url.hostname = CANONICAL_HOST;
       return Response.redirect(url.toString(), 301);
     }
 
+    if (request.method === "GET" && pathname === "/api/terms") {
+      return handleTerms(env);
+    }
     if (request.method === "POST" && pathname === "/api/submit") {
       return handleSubmit(request, env);
     }
