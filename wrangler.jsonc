@@ -22,10 +22,9 @@
   // deploy som alltid är röd är värre än ingen kontroll alls: den lär folk
   // att ignorera rött, och då syns inte nästa riktiga fel heller.
   //
-  // Skyddet ligger i stället i deploy.yml, som hämtar sajten efter varje
-  // deploy och failar om den inte svarar 200. Det fångar exakt det som
-  // faktiskt hände (domänen borta → sajten nere) och kräver noll extra
-  // behörigheter.
+  // Skyddet ligger i stället i deploy.yml. Det verifierar att domänen har
+  // DNS och att Cloudflare-edge svarar på HTTPS; 403 från botskydd accepteras
+  // medan uteblivet svar och 5xx gör deployen röd.
   //
   // NÄR tokenen fått "Zone → Workers Routes → Edit" på denied.se: lägg
   // tillbaka blocket nedan. Då äger repot både routen och DNS-posten, och
@@ -38,7 +37,12 @@
   //   ],
   "assets": {
     "directory": "./public",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Static Assets är annars asset-first. Utan detta kan t.ex. / och
+    // /varfor.html serveras direkt utan att worker.js körs, vilket skulle
+    // kringgå host-redirecten för IDN-aliaset när den custom domain-routen
+    // aktiveras. Worker-koden skickar sedan vanliga anrop vidare till ASSETS.
+    "run_worker_first": true
   },
   "d1_databases": [
     {
