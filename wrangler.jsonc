@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "klarsprak",
-  "main": "src/worker.js",
+  "main": "src/index.js",
   "compatibility_date": "2026-07-01",
   // INGEN "routes" här, och det är ett medvetet val med en obehaglig
   // baksida — läs hela stycket innan du lägger tillbaka den.
