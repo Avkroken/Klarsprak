@@ -1,9 +1,24 @@
 # klarsprak — AI Agent Guide
 
-Statisk prototyp-webbplats (Cloudflare Worker med assets-binding) som visar en
-ordbok där juridiska/myndighetstermer översätts till vardagssvenska, med gapet
-mellan vad allmänheten tror och vad termen faktiskt betyder. Komplement till
-politiker.denied.se. Live på klarsprak.denied.se.
+Statisk prototyp-webbplats (Cloudflare Worker med assets-binding) som jämför
+allmänspråklig betydelse med hur juridik, domstolar och myndigheter använder
+samma ord eller uttryck. Målet är att visa belagda skillnader mellan en
+redovisad språkkälla och en redovisad institutionell/rättslig källa — inte att
+gissa vad "allmänheten tror". Komplement till politiker.denied.se. Live på
+klarsprak.denied.se.
+
+## Innehållsmodell
+
+Varje publicerad term ska ha:
+
+- en parafraserad allmänspråklig betydelse med synlig språkkälla,
+- en parafraserad myndighets-/juridisk användning med synlig primär eller officiell källa,
+- en beskrivning av skillnaden som kan härledas ur dessa två källor,
+- tydlig status om juridisk sakkontroll saknas.
+
+Skriv inte fält eller texter av typen "vad människor tror" utan empiriskt
+underlag. Äldre AI-genererade poster med sådana antaganden ska inte återpubliceras
+genom att bara byta rubrik; de måste källbeläggas och skrivas om från grunden.
 
 ## Conventions
 
@@ -14,6 +29,9 @@ politiker.denied.se. Live på klarsprak.denied.se.
   assets-bindingen.
 - Worker-namn: `klarsprak`. Config i `wrangler.jsonc` (assets-binding +
   D1-binding `DB` mot databasen `klarsprak-db`).
+- Förslagsdatabasen har legacy-namn som `foreslagen_vardagsbetydelse` och
+  `foreslagen_juridisk_definition`. De får behållas internt för
+  bakåtkompatibilitet, men UI och innehåll ska följa modellen ovan.
 - Admin-endpoints skyddades tänkt i två lager: Cloudflare Access (Zero
   Trust-app "klarsprak admin (UI + API)", e-postpolicy) vid edgen, och
   Worker-koden med bearer-token mot secreten `ADMIN_TOKEN`.
@@ -25,9 +43,9 @@ politiker.denied.se. Live på klarsprak.denied.se.
   Innan någon lutar sig mot edge-lagret igen: verifiera det med ett
   faktiskt anrop, inte mot den här filen.
 - Deploy sker via `.github/workflows/deploy.yml` vid push till main.
-- Innehållet i ordboken är AI-genererat och opublicerat — inte juridiskt
-  sakgranskat. Ändra gärna presentation/kod, men flagga tydligt om
-  sakinnehållet (termer/definitioner) ändras utan mänsklig juridisk granskning.
+- Innehållet är ett opublicerat/pilot-underlag och ännu inte juridiskt
+  sakkontrollerat. Ändra gärna presentation/kod, men flagga tydligt om
+  sakinnehållet ändras utan mänsklig juridisk granskning.
 
 ## Arbetsflöde: exakt en uppgift åt gången
 
