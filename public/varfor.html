@@ -1,186 +1,51 @@
 <!doctype html>
+<html lang="sv">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Varför Klarspråk?</title>
 <style>
-  :root {
-    --paper: #f4f5f1;
-    --paper-raised: #ffffff;
-    --ink: #1b2422;
-    --ink-soft: #4a534f;
-    --line: #d8dad3;
-    --navy: #2c3b5c;
-    --navy-soft: #e7eaf2;
-    --navy-line: #c3cbdd;
-    --ochre: #8a5f1f;
-    --ochre-soft: #f4ead4;
-    --ochre-line: #e0cb9c;
-    --focus: #2c3b5c;
-  }
-
-  :root[data-theme="dark"] {
-    --paper: #12161a;
-    --paper-raised: #191e23;
-    --ink: #e7e5dc;
-    --ink-soft: #a9afa8;
-    --line: #2a3138;
-    --navy: #8a9dcf;
-    --navy-soft: #1c2436;
-    --navy-line: #384566;
-    --ochre: #dda94f;
-    --ochre-soft: #2c2415;
-    --ochre-line: #4a3c1e;
-    --focus: #8a9dcf;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --paper: #12161a;
-      --paper-raised: #191e23;
-      --ink: #e7e5dc;
-      --ink-soft: #a9afa8;
-      --line: #2a3138;
-      --navy: #8a9dcf;
-      --navy-soft: #1c2436;
-      --navy-line: #384566;
-      --ochre: #dda94f;
-      --ochre-soft: #2c2415;
-      --ochre-line: #4a3c1e;
-      --focus: #8a9dcf;
-    }
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .wrap {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 3rem 1.5rem 5rem;
-  }
-
-  .eyebrow {
-    font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .eyebrow .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--ochre);
-    flex: none;
-  }
-
-  .eyebrow a { color: var(--ink-soft); }
-
-  h1 {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    font-weight: 400;
-    font-size: clamp(1.9rem, 5vw, 2.6rem);
-    line-height: 1.15;
-    margin: 0 0 1.5rem;
-    text-wrap: balance;
-    letter-spacing: -0.01em;
-  }
-
-  h2 {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    font-weight: 400;
-    font-size: 1.4rem;
-    margin: 2.5rem 0 0.8rem;
-  }
-
-  p {
-    font-size: 1.05rem;
-    margin: 0 0 1.1rem;
-  }
-
-  strong { font-weight: 650; }
-
-  .pullquote {
-    margin: 1.8rem 0;
-    padding: 1.2rem 1.4rem;
-    background: var(--ochre-soft);
-    border-left: 3px solid var(--ochre-line);
-    border-radius: 4px;
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    font-style: italic;
-    font-size: 1.1rem;
-  }
-
-  .callout {
-    margin: 1.8rem 0;
-    padding: 1.1rem 1.3rem;
-    background: var(--navy-soft);
-    border: 1px solid var(--navy-line);
-    border-radius: 6px;
-    font-size: 0.98rem;
-  }
-
-  .callout strong { color: var(--navy); }
-
-  a { color: var(--navy); }
-
-  footer {
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--line);
-    font-size: 0.88rem;
-    color: var(--ink-soft);
-  }
-
-  footer a { color: var(--navy); }
-
-  @media (max-width: 620px) {
-    html { font-size: 18px; }
-    .eyebrow { font-size: 0.8rem; }
-    p { font-size: 1.05rem; }
-  }
+:root{color-scheme:light dark;--paper:#f4f5f1;--raised:#fff;--ink:#1b2422;--muted:#56605b;--line:#d8dad3;--accent:#2d3f69;--accent-bg:#e8ebf3;--warn:#875c1d;--warn-bg:#f5ead3}
+@media(prefers-color-scheme:dark){:root{--paper:#12161a;--raised:#191e23;--ink:#e9e7df;--muted:#a9afa8;--line:#2a3138;--accent:#9aaddc;--accent-bg:#1c2436;--warn:#e0ad57;--warn-bg:#2b2417}}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.65}.wrap{max-width:760px;margin:auto;padding:3rem 1.3rem 5rem}a{color:var(--accent);text-underline-offset:2px}.eyebrow{font:700 .72rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1.4rem}h1,h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:400;letter-spacing:-.01em}h1{font-size:clamp(2.1rem,6vw,3rem);line-height:1.08;margin:0 0 1.3rem}h2{font-size:1.45rem;margin:2.3rem 0 .7rem}p{font-size:1.03rem;margin:0 0 1rem}.callout{padding:1rem 1.1rem;border:1px solid var(--line);border-radius:9px;background:var(--raised);margin:1.5rem 0}.method{background:var(--accent-bg);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}.warning{background:var(--warn-bg);border-color:color-mix(in srgb,var(--warn) 35%,var(--line))}.method ol{margin:.6rem 0 .1rem;padding-left:1.3rem}.method li{margin:.45rem 0}footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem}@media(max-width:620px){html{font-size:17px}.wrap{padding:2rem 1rem 4rem}}
 </style>
-
-<div class="wrap">
-  <div class="eyebrow"><span class="dot"></span><a href="/">klarspråk.denied.se</a> · varför</div>
+</head>
+<body>
+<main class="wrap">
+  <div class="eyebrow"><a href="/">klarsprak.denied.se</a> · metod och syfte</div>
   <h1>Varför finns Klarspråk?</h1>
 
-  <p>Sommaren 2026 skickade en privatperson en medborgarskrivelse till Sveriges riksdags konstitutionsutskott och justitieutskott. Ämnet var enkelt att formulera men svårt att lösa: <strong>institutioner som skapats för att tjäna medborgarna har ett ansvar att kommunicera med dem på ett sätt som är transparent, korrekt och begripligt</strong> — och när ord används med en teknisk innebörd som avviker från deras allmänspråkliga betydelse, utan att det görs explicit, uppstår en maktasymmetri som undergräver demokratisk legitimitet.</p>
+  <p>Offentliga institutioner använder ofta ord som också finns i vanligt svenskt språk. I juridik och myndighetsutövning kan samma ord eller fras samtidigt fungera som en teknisk term, en bevisnivå eller en särskild beslutströskel.</p>
 
-  <div class="pullquote">
-    "Ett samhälle där den som bestämmer också bestämmer vad orden betyder är inte ett rättssamhälle. Det är ett samhälle där makten är sin egen domare."
+  <p>Det är inte i sig konstigt att fackspråk finns. Problemet uppstår när en mottagare rimligen kan läsa orden på deras vanliga språkliga betydelse medan institutionen använder dem på ett mer avgränsat, graderat eller kontextberoende sätt — utan att skillnaden framgår.</p>
+
+  <div class="callout method">
+    <strong>Klarspråk ska därför jämföra belägg, inte gissa om människor.</strong>
+    <ol>
+      <li>Visa en allmänspråklig betydelse från en redovisad ordbok eller annan etablerad språkkälla.</li>
+      <li>Visa den juridiska eller administrativa användningen från lag, förarbete, domstol eller myndighet.</li>
+      <li>Beskriv bara den skillnad som faktiskt kan härledas ur de två källorna.</li>
+    </ol>
   </div>
 
-  <p>Skrivelsen pekade särskilt på att beviskravet <strong>"bortom rimliga tvivel"</strong> tillämpas av domstolar med en teknisk innebörd som skiljer sig från vad orden betyder i vardagligt språk — och att den skillnaden aldrig beslutats av folkvalda, utan vuxit fram genom självförstärkande juridisk praxis. Men mönstret slutar inte där. Det återfinns varje gång en myndighet hänvisar till "gällande riktlinjer" utan att förklara dem, varje gång ett yrke med beslutsmakt över enskildas liv opererar med begrepp det definierar självt, utan granskning utifrån.</p>
+  <h2>Vad sidan inte ska göra</h2>
+  <p>Den tidigare versionen innehöll fält som “vad människor tror”. Sådana påståenden kräver undersökningar av människors faktiska uppfattningar. En språkmodell kan inte ersätta det med en trovärdig gissning. Därför är den modellen borttagen från den publika sidan.</p>
 
-  <h2>Från krav till verktyg</h2>
+  <p>Klarspråk ska inte heller slå fast att en juridisk betydelse är fel bara för att den skiljer sig från en ordboksbetydelse. Sidan ska visa skillnaden tydligt och låta läsaren bedöma betydelsen av den.</p>
 
-  <p>Skrivelsen krävde tre saker av riksdagen: en granskning av hur institutioner faktiskt använder språk, ett utredningsuppdrag om språklig transparens i lagstiftning, och stärkt demokratisk kontroll över vem som får bestämma vad juridiska begrepp betyder.</p>
+  <h2>Varför källorna måste synas</h2>
+  <p>Ord som “skälig”, “sannolik”, “särskild” och “synnerlig” kan låta självförklarande. I rättsliga sammanhang kan de däremot ingå i graderade trösklar vars konkreta innebörd bestäms av den aktuella regeln, förarbeten och rättstillämpning. Då räcker det inte att presentera en omskrivning utan att visa var den kommer ifrån.</p>
 
-  <p>Ett svar som kom tillbaka — från en annan medborgare, inte från utskotten själva — föreslog istället en öppen webbplats som "översätter" myndighetsspråk till vardagssvenska. Ett gott förslag i grunden, men otillräckligt om det stannar vid att förklara institutionernas befintliga definitioner utan att samtidigt granska VEM som fått bestämma dem.</p>
+  <p>Varje publicerad post ska därför ha minst en språkkälla och en institutionell källa. Om en källa saknas ska posten inte presenteras som färdig.</p>
 
-  <div class="callout">
-    <strong>Klarspråk är ett försök att göra båda delarna samtidigt.</strong> Varje term visar inte bara vad ett ord betyder juridiskt, utan lägger det bredvid vad en vanlig medborgare rimligen tror att det betyder — gapet mellan de två är själva poängen. Det gapet är inte ett kommunikationsproblem som löses med bättre pedagogik. Det är ett symptom på att definitionsmakten aldrig förankrats demokratiskt.
-  </div>
+  <div class="callout warning"><strong>Status:</strong> Den publika listan är just nu en källbelagd pilot. Formuleringarna är fortfarande inte juridiskt sakkontrollerade och ska inte användas som juridisk rådgivning.</div>
 
-  <p>Sajten gör inte anspråk på att vara en lösning på det underliggande problemet skrivelsen beskrev — bara ett litet, konkret verktyg som synliggör det, term för term. Innehållet är fortfarande under uppbyggnad, AI-genererat och inte sakgranskat av en jurist (se banner på startsidan). Vem som helst kan föreslå en term eller en bättre definition — varje bidrag granskas av en människa innan det publiceras, för att sajten själv inte ska falla i samma fälla som brevet kritiserar: att en part ensam får bestämma vad orden betyder.</p>
+  <h2>Det demokratiska perspektivet</h2>
+  <p>Begripligt myndighetsspråk handlar inte bara om enklare formuleringar. När ett offentligt organ använder ett vardagligt ord som teknisk term behöver medborgaren kunna se vilken betydelse som faktiskt används och på vilken grund. Klarspråk är tänkt som ett praktiskt sätt att göra den jämförelsen möjlig, term för term.</p>
 
-  <p>Klarspråk är byggt som ett komplement till <a href="https://politiker.denied.se">politiker.denied.se</a>, där medborgare kan skriva till sina förtroendevalda direkt.</p>
+  <p>Sajten är ett komplement till <a href="https://politiker.denied.se">politiker.denied.se</a>, där medborgare kan kontakta sina förtroendevalda.</p>
 
-  <footer>
-    <a href="/">← Tillbaka till ordboken</a>
-  </footer>
-</div>
+  <footer><a href="/">← Tillbaka till jämförelserna</a></footer>
+</main>
+</body>
+</html>

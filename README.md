@@ -1,79 +1,62 @@
 # klarsprak
 
-Prototyp-webbplats: en ordbok som översätter juridiska och myndighetstermer
-till vardagssvenska, och visar gapet mellan hur en vanlig medborgare rimligen
-tolkar ett ord och hur domstolar/myndigheter faktiskt tillämpar det.
-
-Byggd som komplement till [politiker.denied.se](https://politiker.denied.se) —
-underlag för diskussionen om institutioners språkliga transparens gentemot
-medborgare.
+Prototyp-webbplats som jämför **allmänspråklig betydelse** med **myndighets-/juridisk användning** av samma ord och uttryck. Syftet är att synliggöra när offentliga institutioner använder vanliga svenska ord som tekniska termer, bevisnivåer eller beslutströsklar.
 
 Live: **klarsprak.denied.se**
 
+## Innehållsmodell
+
+Varje publicerad post ska ha fyra delar:
+
+1. **Ordbokens betydelse** — en kort parafras av en redovisad språkkälla, i första hand Svenska Akademiens ordböcker eller annan etablerad källa.
+2. **Institutionens användning** — en kort parafras av lag, förarbete, domstol eller myndighet.
+3. **Skillnaden** — endast det som faktiskt kan härledas ur de två källorna.
+4. **Källor** — minst en språkkälla och en institutionell/rättslig källa som besökaren kan kontrollera.
+
+Den tidigare modellen med fältet **"vad människor tror"** används inte längre på den publika sidan. Sådana påståenden kräver empiriskt underlag om människors faktiska uppfattningar och ska inte genereras av AI.
+
 ## Status
 
-**Opublicerat utkast.** Innehållet är AI-genererat och väntar på granskning:
-juridisk sakkontroll och avstämning av vardagsbetydelsen mot seriösa
-uppslagsverk (SO/SAOL, NE, Wiktionary). Ingen av definitionerna ska
-betraktas som auktoritativa ännu.
+**Opublicerat/pilot.** De fem poster som visas på startsidan har explicita källhänvisningar men är fortfarande inte juridiskt sakkontrollerade. Äldre AI-genererade poster har tagits bort från den publika listan tills de kan byggas om enligt modellen ovan.
 
 ## Teknik
 
-- Frontend är statiska HTML-filer (`public/index.html`, `public/admin.html`,
-  inline CSS+JS) — ingen build-process.
-- Deployas som en Cloudflare Worker (`src/worker.js`) med både en
-  assets-binding (`public/`) och en D1-binding (`klarsprak-db`) i
-  `wrangler.jsonc`.
-- Auto-deploy till Cloudflare vid push till `main` via
-  `.github/workflows/deploy.yml`.
+- Frontend: statiska HTML-filer i `public/`, inline CSS+JS, ingen build-process.
+- Backend: Cloudflare Worker i `src/worker.js`.
+- Assets-binding: `public/`.
+- D1-binding: `DB` mot `klarsprak-db`.
+- Auto-deploy: `.github/workflows/deploy.yml` vid push till `main`.
+- Observability är aktiverat i `wrangler.jsonc`.
 
-## Inlämnings- och granskningsflöde
+## Inlämning och granskning
 
-Vem som helst kan föreslå en term via knappen "Föreslå term" på startsidan.
-Förslaget postas till `POST /api/submit` och sparas i D1-databasen
-`klarsprak-db` (tabell `submissions`) med status `pending`. Inget publiceras
-automatiskt.
+Besökare kan föreslå en term via `POST /api/submit`. Formuläret efterfrågar nu:
 
-`/api/submit` är IP-baserat rate-begränsat: max 5 inlägg per `CF-Connecting-IP`
-per rullande timme (räknas mot `submissions.submitter_ip`, se
-`migrations/0002_add_submitter_ip.sql`). Förfrågningar utan identifierbar IP
-spärras inte (kan inte räknas).
+- allmänspråklig betydelse,
+- myndighets-/juridisk användning,
+- källor och exempel,
+- rättsområde,
+- frivilligt namn/kommentar.
 
-En människa (kontoägaren) granskar kön på `/admin.html`:
+Backend använder av bakåtkompatibilitet fortfarande databasfälten `foreslagen_vardagsbetydelse`, `foreslagen_juridisk_definition` och `foreslagen_exempel`. Fältnamnen är interna legacy-namn; den publika och administrativa presentationen följer den nya modellen.
 
-- Sidan frågar efter admin-token (sparas endast i `sessionStorage`, aldrig
-  i kod eller README).
-- `GET /api/admin/queue` listar väntande förslag.
-- `POST /api/admin/review/:id` med body `{"action": "approve"|"reject",
-  "note"?: string}` uppdaterar status.
+Förslag sparas i D1-tabellen `submissions` med status `pending`. Inget publiceras automatiskt. `POST /api/submit` är IP-baserat rate-begränsat till högst fem inlägg per rullande timme när `CF-Connecting-IP` finns.
 
-### Skydd i två lager
+`/admin.html` visar granskningskön. Admin-API:t kräver `Authorization: Bearer <ADMIN_TOKEN>`. Token sparas endast i `sessionStorage` i admin-UI:t.
 
-`/admin`, `/admin/*` och `/api/admin/*` skyddas av **Cloudflare Access**
-(Zero Trust-app "klarsprak admin (UI + API)", policy: e-postinloggning för
-kontoägaren) — obehöriga blockeras redan vid Cloudflare-edgen, innan
-requesten når workern. Detta är samma mönster som politiker-webapp använder
-för sitt `/admin`.
+## Cloudflare Access
 
-Utöver Access behåller Worker-koden sin egen `ADMIN_TOKEN`-kontroll som
-andra skyddslager (defense in depth) — även om Access någon gång
-misskonfigureras krävs fortfarande token för att nå API:erna.
+Worker-tokenen är det verifierade aktiva skyddet för admin-API:t. Cloudflare Access har tidigare varit tänkt som ett extra edge-lager, men får inte antas vara aktivt utan faktisk kontroll. Se `AGENTS.md`.
 
-Admin-endpoints skyddas av en bearer-token-check mot secreten `ADMIN_TOKEN`:
+## Domän
 
-```sh
-openssl rand -hex 32 | bunx wrangler secret put ADMIN_TOKEN
-```
+`wrangler.jsonc` äger i nuläget inte custom-domain-routen eftersom deploytokenen saknar zonbehörighet för Workers Routes. Deployworkflowen verifierar därför efter deploy att `klarsprak.denied.se` fortfarande har DNS och att Cloudflare-edgen svarar.
 
-Token delas manuellt med kontoägaren — spara den inte i git.
-
-**Framtida uppgradering:** ersätt token-skyddet med Cloudflare Access på
-`/admin.html` + `/api/admin/*`, samma mönster som politiker-webapp använder
-för sin `/admin`-yta. Inte gjort ännu.
+När tokenen får begränsad `Zone → Workers Routes → Edit` för `denied.se` bör custom domain flyttas tillbaka till deklarativ konfiguration i `wrangler.jsonc`.
 
 ## Databas
 
-D1-migrationer ligger i `migrations/`. Kör mot den riktiga databasen med:
+Migrationer ligger i `migrations/` och appliceras mot produktion med:
 
 ```sh
 bunx wrangler d1 migrations apply klarsprak-db --remote
@@ -82,6 +65,7 @@ bunx wrangler d1 migrations apply klarsprak-db --remote
 ## Utveckling
 
 ```sh
+bun install
 bunx wrangler dev
 ```
 
@@ -91,7 +75,4 @@ bunx wrangler dev
 bunx wrangler deploy
 ```
 
-Kräver `CLOUDFLARE_API_TOKEN` och `CLOUDFLARE_ACCOUNT_ID` (secrets i
-GitHub Actions för auto-deploy, eller lokalt i miljön för manuell deploy).
-Deploy-token behöver även behörighet att uppdatera D1-bindingen (D1:Edit)
-utöver Workers Scripts:Edit.
+Kräver `CLOUDFLARE_API_TOKEN` och `CLOUDFLARE_ACCOUNT_ID`.
