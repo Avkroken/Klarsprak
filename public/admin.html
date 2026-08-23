@@ -5,19 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Klarspråk — granskningskö</title>
 <style>
-:root{color-scheme:light dark;--bg:#f4f5f1;--card:#fff;--text:#1b2422;--muted:#5b625f;--line:#d8dad3;--accent:#2d3f69;--danger:#8a2e2e;--ok:#2f6a47}
-@media(prefers-color-scheme:dark){:root{--bg:#12161a;--card:#191e23;--text:#e9e7df;--muted:#a9afa8;--line:#2a3138;--accent:#9aaddc;--danger:#ed8d8d;--ok:#82c99d}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}.wrap{max-width:900px;margin:auto;padding:2.5rem 1.2rem 5rem}h1,h2{font-family:Georgia,serif;font-weight:400}h1{margin:0 0 .5rem}.sub{color:var(--muted);margin:0 0 1.5rem}.auth,.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}input,textarea,button{font:inherit}input,textarea{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:7px;padding:.6rem .7rem}.auth input{flex:1 1 280px}.btn{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:7px;padding:.55rem .8rem;cursor:pointer}.btn.primary{border-color:var(--accent);background:var(--accent);color:#fff}.btn.reject{border-color:var(--danger);color:var(--danger)}.meta{font-size:.78rem;color:var(--muted);margin-bottom:.7rem}.label{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:.7rem}.value{white-space:pre-wrap;margin:.2rem 0 .5rem}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.note{width:100%;min-height:70px}.status{font-size:.85rem;color:var(--muted);margin:.8rem 0}.empty{padding:2rem;text-align:center;color:var(--muted)}a{color:var(--accent)}
+:root{color-scheme:light dark;--bg:#f4f5f1;--card:#fff;--text:#1b2422;--muted:#5b625f;--line:#d8dad3;--accent:#2d3f69;--danger:#8a2e2e}
+@media(prefers-color-scheme:dark){:root{--bg:#12161a;--card:#191e23;--text:#e9e7df;--muted:#a9afa8;--line:#2a3138;--accent:#9aaddc;--danger:#ed8d8d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}.wrap{max-width:980px;margin:auto;padding:2.5rem 1.2rem 5rem}h1,h2{font-family:Georgia,serif;font-weight:400}h1{margin:0 0 .5rem}.sub{color:var(--muted);margin:0 0 1.5rem}.auth,.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}input,textarea,button{font:inherit}input,textarea{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:7px;padding:.6rem .7rem;width:100%}.auth input{flex:1 1 280px;width:auto}.btn{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:7px;padding:.55rem .8rem;cursor:pointer}.btn.primary{border-color:var(--accent);background:var(--accent);color:#fff}.btn.reject{border-color:var(--danger);color:var(--danger)}.meta,.status,.hint{font-size:.82rem;color:var(--muted)}.label{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:.7rem}.value{white-space:pre-wrap;margin:.2rem 0 .5rem}.publication{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line);display:grid;gap:.75rem}.publication h3{margin:0;font:600 1rem -apple-system,"Segoe UI",sans-serif}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}.field{display:grid;gap:.25rem}.field.full{grid-column:1/-1}.field span{font-size:.75rem;font-weight:700}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.note{min-height:70px}.empty{padding:2rem;text-align:center;color:var(--muted)}a{color:var(--accent)}@media(max-width:700px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
 </style>
 </head>
 <body>
 <main class="wrap">
 <h1>Klarspråk — granskningskö</h1>
-<p class="sub">Förslag ska bedömas mot den nya modellen: allmänspråklig källa + institutionell källa + tydligt beskriven skillnad. Fältens interna databasnamn är äldre men innehållet ska bedömas enligt denna modell.</p>
-<section class="auth">
-  <div class="row"><input id="token" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN"><button class="btn primary" id="load" type="button">Ladda kö</button><a href="/">Till startsidan</a></div>
-  <div class="status" id="status">Token sparas endast i sessionStorage för denna flik.</div>
-</section>
+<p class="sub">Ett godkännande publicerar en separat, strukturerad termpost. Förslaget är underlag; redaktören ansvarar för sluttext, båda källorna och den beskrivna skillnaden.</p>
+<section class="auth"><div class="row"><input id="token" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN"><button class="btn primary" id="load" type="button">Ladda kö</button><a href="/">Till startsidan</a></div><div class="status" id="status">Token sparas endast i sessionStorage för denna flik.</div></section>
 <section id="queue"></section>
 </main>
 <script>
@@ -25,16 +22,33 @@ const tokenEl=document.querySelector('#token');const statusEl=document.querySele
 tokenEl.value=sessionStorage.getItem('klarsprak-admin-token')||'';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function auth(){const t=tokenEl.value.trim();if(!t)throw new Error('Admin-token saknas.');sessionStorage.setItem('klarsprak-admin-token',t);return {'authorization':`Bearer ${t}`};}
-async function load(){
-  statusEl.textContent='Laddar…';queue.innerHTML='';
-  try{const r=await fetch('/api/admin/queue',{headers:auth()});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);render(d.submissions||[]);statusEl.textContent=`${(d.submissions||[]).length} väntande förslag.`;}catch(e){statusEl.textContent=e.message||String(e);}
-}
-function field(label,value){if(!value)return'';return `<div class="label">${esc(label)}</div><div class="value">${esc(value)}</div>`;}
+async function load(){statusEl.textContent='Laddar…';queue.innerHTML='';try{const r=await fetch('/api/admin/queue',{headers:auth()});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);render(d.submissions||[]);statusEl.textContent=`${(d.submissions||[]).length} väntande förslag.`;}catch(e){statusEl.textContent=e.message||String(e);}}
+function refField(label,value){if(!value)return'';return `<div class="label">${esc(label)}</div><div class="value">${esc(value)}</div>`;}
+function input(name,label,value='',opts=''){return `<label class="field"><span>${esc(label)}</span><input name="${name}" value="${esc(value)}" ${opts}></label>`;}
+function textarea(name,label,value='',opts=''){return `<label class="field full"><span>${esc(label)}</span><textarea name="${name}" rows="3" ${opts}>${esc(value)}</textarea></label>`;}
 function render(items){
-  if(!items.length){queue.innerHTML='<div class="empty">Kön är tom.</div>';return;}
-  queue.innerHTML=items.map(x=>`<article class="card" data-id="${esc(x.id)}"><h2>${esc(x.term)}</h2><div class="meta">#${esc(x.id)} · ${esc(x.foreslaget_rattsomrade||'inget rättsområde')} · ${esc(x.created_at||'')}</div>${field('Allmänspråklig betydelse (legacy-fält: foreslagen_vardagsbetydelse)',x.foreslagen_vardagsbetydelse)}${field('Myndighetens/juridikens användning (legacy-fält: foreslagen_juridisk_definition)',x.foreslagen_juridisk_definition)}${field('Källor / exempel',x.foreslagen_exempel)}${field('Inskickare',x.inskickare_namn)}${field('Kommentar',x.inskickare_kommentar)}<textarea class="note" placeholder="Granskningsanteckning (valfritt)"></textarea><div class="actions"><button class="btn primary" data-action="approve" type="button">Godkänn</button><button class="btn reject" data-action="reject" type="button">Avslå</button></div></article>`).join('');
+ if(!items.length){queue.innerHTML='<div class="empty">Kön är tom.</div>';return;}
+ queue.innerHTML=items.map(x=>`<article class="card" data-id="${esc(x.id)}">
+  <h2>${esc(x.term)}</h2><div class="meta">#${esc(x.id)} · ${esc(x.foreslaget_rattsomrade||'inget rättsområde')} · ${esc(x.created_at||'')}</div>
+  ${refField('Inskickad allmänspråklig betydelse',x.foreslagen_vardagsbetydelse)}${refField('Inskickad institutionell användning',x.foreslagen_juridisk_definition)}${refField('Inskickade källor / exempel',x.foreslagen_exempel)}${refField('Inskickare',x.inskickare_namn)}${refField('Kommentar',x.inskickare_kommentar)}
+  <section class="publication"><h3>Publiceringspost</h3><div class="hint">Alla markerade fält krävs för Godkänn. URLs valideras av Workern.</div><div class="grid">
+   ${input('term','Term *',x.term,'required maxlength="200"')}
+   ${input('rattsomrade','Rättsområde *',x.foreslaget_rattsomrade||'Annat','required maxlength="100"')}
+   ${textarea('allmansprak','Ordbokens/allmänspråkets betydelse *',x.foreslagen_vardagsbetydelse||'','required maxlength="4000"')}
+   ${input('sprak_kalla_namn','Språkkälla — namn *','','required maxlength="300"')}
+   ${input('sprak_kalla_url','Språkkälla — URL *','','required type="url" maxlength="2000"')}
+   ${textarea('institution','Institutionens användning *',x.foreslagen_juridisk_definition||'','required maxlength="4000"')}
+   ${input('institution_kalla_namn','Institutionell källa — namn *','','required maxlength="300"')}
+   ${input('institution_kalla_url','Institutionell källa — URL *','','required type="url" maxlength="2000"')}
+   ${textarea('skillnad','Skillnaden *','','required maxlength="4000"')}
+   ${textarea('notering','Notering',x.foreslagen_exempel||'','maxlength="2000"')}
+  </div></section>
+  <textarea class="note" placeholder="Intern granskningsanteckning (valfritt)" maxlength="2000"></textarea>
+  <div class="actions"><button class="btn primary" data-action="approve" type="button">Godkänn och publicera</button><button class="btn reject" data-action="reject" type="button">Avslå</button></div>
+ </article>`).join('');
 }
-queue.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;const card=b.closest('[data-id]');const id=card.dataset.id;const action=b.dataset.action;const note=card.querySelector('.note').value.trim();b.disabled=true;try{const r=await fetch(`/api/admin/review/${encodeURIComponent(id)}`,{method:'POST',headers:{...auth(),'content-type':'application/json'},body:JSON.stringify({action,note})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);card.remove();statusEl.textContent=`Förslag #${id}: ${action==='approve'?'godkänt':'avslaget'}.`;}catch(err){statusEl.textContent=err.message||String(err);b.disabled=false;}});
+function publicationFrom(card){const data={};for(const el of card.querySelectorAll('.publication [name]'))data[el.name]=el.value.trim();return data;}
+queue.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;const card=b.closest('[data-id]');const id=card.dataset.id;const action=b.dataset.action;const note=card.querySelector('.note').value.trim();if(action==='approve'){for(const el of card.querySelectorAll('.publication [required]')){if(!el.reportValidity())return;}}b.disabled=true;try{const body={action,note};if(action==='approve')body.publication=publicationFrom(card);const r=await fetch(`/api/admin/review/${encodeURIComponent(id)}`,{method:'POST',headers:{...auth(),'content-type':'application/json'},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);card.remove();statusEl.textContent=`Förslag #${id}: ${action==='approve'?'publicerat':'avslaget'}.`;}catch(err){statusEl.textContent=err.message||String(err);b.disabled=false;}});
 document.querySelector('#load').addEventListener('click',load);tokenEl.addEventListener('keydown',e=>{if(e.key==='Enter')load();});
 </script>
 </body>
