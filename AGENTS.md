@@ -16,9 +16,9 @@ Statisk prototyp på Cloudflare Workers som jämför allmänspråklig betydelse 
 
 1. Skapa en ny kortlivad branch från aktuell `main` för varje uppgift.
 2. Implementera och kör relevanta tester lokalt (`bun run test` och andra kontroller som berör ändringen).
-3. Öppna PR från arbetsbranchen till `main` som klar för granskning. Aktivera inte auto-merge.
+3. Öppna PR från arbetsbranchen till `main` som klar för granskning. Auto-merge är tillåtet och får aktiveras när PR:n är redo; GitHub mergar först när alla ruleset-krav är uppfyllda.
 4. Lös CI- och reviewproblem på samma branch. Required checks och review-trådar ska vara klara före merge.
-5. Merge sker med **squash merge**. Använd inte merge commits eller rebase merge. Head-branchen får raderas efter merge.
+5. **Squash merge är den enda tillåtna merge-metoden.** Använd inte merge commits eller rebase merge. Repot är konfigurerat att automatiskt radera head-branchen efter merge.
 
 Skicka aldrig direkt till `main`, kringgå inte rulesets och ändra inte hemligheter eller organisationsinställningar utan uttrycklig instruktion.
 
