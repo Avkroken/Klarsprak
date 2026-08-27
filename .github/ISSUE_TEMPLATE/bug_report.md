@@ -1,38 +1,32 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+name: Felrapport
+about: Rapportera ett fel i webbplatsen, API:t eller innehållspresentationen
+title: "[Fel] "
+labels: ""
+assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Vad är fel?
+Beskriv kort vad som inte fungerar eller visas felaktigt.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+## Så går felet att återskapa
+1. Gå till ...
+2. Gör ...
+3. Observera ...
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Förväntat beteende
+Beskriv vad som borde ha hänt i stället.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Var uppstår felet?
+- Sida eller URL:
+- Gäller det frontend, API, admin eller innehåll/data?
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+## Miljö
+- Enhet/OS:
+- Webbläsare och version:
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+## Underlag
+Lägg till felmeddelande, loggutdrag eller skärmbild om det hjälper felsökningen. Ta bort tokens, personuppgifter och andra hemligheter innan du postar.
 
-**Additional context**
-Add any other context about the problem here.
+## Övrigt
+Annan information som kan vara relevant.
