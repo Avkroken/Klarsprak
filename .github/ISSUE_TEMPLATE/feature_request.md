@@ -1,20 +1,28 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
-
+name: Förbättringsförslag
+about: Föreslå en förbättring av webbplatsen, innehållsmodellen eller arbetsflödet
+title: "[Förslag] "
+labels: ""
+assignees: ""
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Problem eller behov
+Beskriv vilket problem förslaget ska lösa eller vilket behov som saknas i dag.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+## Föreslagen lösning
+Beskriv vad du vill ändra och hur det bör fungera.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## Om förslaget gäller innehåll
+Ange gärna:
+- ord eller uttryck,
+- allmänspråklig betydelse,
+- myndighets-/juridisk användning,
+- relevanta språkliga och institutionella/rättsliga källor.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+Undvik obelagda påståenden om vad människor generellt tror eller uppfattar.
+
+## Alternativ
+Beskriv andra lösningar du har övervägt, om några.
+
+## Övrigt
+Länkar, exempel, skärmbilder eller annan information som hjälper till att bedöma förslaget.
