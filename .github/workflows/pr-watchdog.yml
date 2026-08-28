@@ -64,7 +64,7 @@ jobs:
                   const closed=await github.paginate(github.rest.pulls.list,{owner,repo,state:'closed',head:`${owner}:${name}`,base,per_page:100});
                   if(closed.some((candidate)=>candidate.head?.sha===headSha))continue;
                   const previous=state[name];
-                  const firstSeenAt=previous?.headSha===headSha&&previous.firstSeenAt?previous.firstSeenAt:new Date(now).toISOString();
+                  const firstSeenAt=previous?.firstSeenAt||new Date(now).toISOString();
                   next[name]={headSha,firstSeenAt};
                   const firstSeenMs=Date.parse(firstSeenAt);
                   if(!Number.isFinite(firstSeenMs)||now-firstSeenMs<=maxAgeMs)continue;
@@ -73,7 +73,7 @@ jobs:
                   const tip=await github.rest.repos.getCommit({owner,repo,ref:headSha});
                   const ageMinutes=Math.floor((now-firstSeenMs)/60000);
                   const title=(tip.data.commit.message||'').split('\n')[0].trim()||`auto: öppna PR för ${name}`;
-                  const body=[marker,'',`Branch \`${name}\` har haft samma oPR:ade HEAD i ${ageMinutes} minuter och har unika commits jämfört med \`${base}\`.`,`Watchdog-tip: \`${headSha.slice(0,7)}\`.`, '', 'Watchdoggen bedömer inte om arbetet ska mergas. Auto-merge armeras direkt; required checks, relevanta review-trådar och merge queue måste fortfarande passera före squash merge.'].join('\n');
+                  const body=[marker,'',`Branch \`${name}\` har saknat öppen PR med unika commits i ${ageMinutes} minuter.`,`Watchdog-tip: \`${headSha.slice(0,7)}\`.`, '', 'Watchdoggen bedömer inte om arbetet ska mergas. Auto-merge armeras direkt; required checks, relevanta review-trådar och merge queue måste fortfarande passera före squash merge.'].join('\n');
                   try{pr=(await github.rest.pulls.create({owner,repo,head:name,base,title,body,draft:false,maintainer_can_modify:true})).data;}
                   catch(error){if(error.status!==422)throw error;const raced=await github.rest.pulls.list({owner,repo,state:'open',head:`${owner}:${name}`,base,per_page:100});pr=raced.data[0];if(!pr||!(pr.body||'').includes(marker)){delete next[name];continue;}}
                   delete next[name];
