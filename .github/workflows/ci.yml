@@ -1,9 +1,6 @@
 name: Validate Worker and D1
 
 on:
-  # Merge-kön skickar merge_group.checks_requested. Utan den här
-  # triggern svarar inget jobb och kön fastnar tills timeout.
-  merge_group:
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -23,6 +20,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Blockera ofärdig Codex-remediation
+        shell: bash
+        run: |
+          set -euo pipefail
+          if compgen -G '.github/codex-dispatch/issue-*.md' > /dev/null; then
+            echo '::error::Codex-remediation innehåller fortfarande en tillfällig seed-fil. Implementera och verifiera fixen och ta bort seed-filen före merge.'
+            find .github/codex-dispatch -maxdepth 1 -type f -name 'issue-*.md' -print
+            exit 1
+          fi
 
       - name: Setup Bun
         run: npm install --global bun
