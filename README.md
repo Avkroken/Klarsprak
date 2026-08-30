@@ -28,6 +28,7 @@ Den tidigare modellen med fältet **"vad människor tror"** används inte längr
 - Produktion: Cloudflare Workers Builds triggas från `main` och kör `bun run deploy:production`.
 - GitHub Actions används för CI, säkerhetskontroller och remediation — inte för produktionsdeploy.
 - Observability är aktiverat i `wrangler.jsonc`.
+- `workers.dev` och Worker Preview URLs är explicit avstängda; produktion exponeras endast via deklarerade custom domains.
 
 ## Inlämning och granskning
 
@@ -57,6 +58,8 @@ Worker-tokenen är det verifierade aktiva skyddet för admin-API:t. Cloudflare A
 - `xn--klarsprk-g0a.denied.se` (`klarspråk.denied.se`)
 
 Worker-koden redirectar IDN-aliaset till den kanoniska hosten. Cloudflare-buildtokenen måste därför ha den begränsade routebehörighet som Wrangler behöver för dessa custom domains.
+
+`workers_dev: false` och `preview_urls: false` ligger i samma Wrangler-konfiguration, så en normal deploy ska inte skapa någon parallell publik `workers.dev`- eller preview-yta.
 
 ## Databas
 
