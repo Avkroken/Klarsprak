@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 import { checkProduction } from "./check-production-domain.mjs";
 
@@ -13,7 +14,7 @@ function run(command, args) {
   }
 }
 
-function workersBuildMetadata(env = process.env) {
+export function workersBuildMetadata(env = process.env) {
   if (env.WORKERS_CI !== "1") return { commitSha: null };
 
   const branch = env.WORKERS_CI_BRANCH?.trim();
@@ -41,7 +42,7 @@ export async function deployProduction(env = process.env) {
   await checkProduction();
 }
 
-if (import.meta.url === new URL(`file://${process.argv[1]}`).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   deployProduction().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`::error::${message}`);
