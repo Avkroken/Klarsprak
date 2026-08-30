@@ -35,7 +35,7 @@ export async function deployProduction(env = process.env) {
 
   run("wrangler", ["d1", "migrations", "apply", DATABASE, "--remote"]);
 
-  const deployArgs = ["deploy"];
+  const deployArgs = ["deploy", "--strict"];
   if (commitSha) deployArgs.push("--message", `Git ${commitSha}`);
   run("wrangler", deployArgs);
 
