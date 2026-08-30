@@ -11,6 +11,7 @@ Den här filen är repositoryts auktoritativa arbetsinstruktion. Live GitHub-kon
 - Admin-API skyddas med bearer-token mot `ADMIN_TOKEN`.
 - Produktionsdeploy ägs av Cloudflare Workers Builds. Push till `main` triggar `bun run deploy:production`, som applicerar återstående D1-migrationer, deployar Workern och verifierar produktionsdomänen.
 - `wrangler.jsonc` äger Worker-bindings, observability och custom domains deklarativt.
+- `workers.dev` och Preview URLs är explicit avstängda i `wrangler.jsonc`; produktion ska endast exponeras via deklarerade custom domains om inte en senare PR uttryckligen ändrar policyn.
 - Innehållet är pilotmaterial; sakpåståenden och skillnader ska vara källbelagda och juridiskt känsliga ändringar ska flaggas för mänsklig sakkontroll.
 
 ## Brancher och pull requests
@@ -58,6 +59,7 @@ Om auto-merge inte sker ska den konkreta blockeraren i live-ruleset, review-stat
 - GitHub Actions ska inte deploya produktion. Cloudflare Workers Builds är enda normala produktionsdeploykedjan.
 - Cloudflares production deploy command ska vara `bun run deploy:production`.
 - D1-migrationer körs automatiskt i Cloudflare före Worker-deploy. Manuell remote-migrering är endast reservväg för felsökning/återställning.
+- Wrangler är source of truth för Worker-routes och publika Worker-ytor. Ändra inte `workers.dev`, Preview URLs eller custom domains endast i Dashboard; motsvarande avsikt ska versionshanteras i `wrangler.jsonc`.
 
 ## Verifiering
 

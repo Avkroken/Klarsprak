@@ -3,6 +3,8 @@
   "name": "klarsprak",
   "main": "src/index.js",
   "compatibility_date": "2026-07-01",
+  "workers_dev": false,
+  "preview_urls": false,
   "routes": [
     { "pattern": "klarsprak.denied.se", "custom_domain": true },
     { "pattern": "xn--klarsprk-g0a.denied.se", "custom_domain": true }
