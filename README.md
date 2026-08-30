@@ -25,7 +25,8 @@ Den tidigare modellen med fältet **"vad människor tror"** används inte längr
 - Backend: Cloudflare Worker i `src/worker.js`.
 - Assets-binding: `public/`.
 - D1-binding: `DB` mot `klarsprak-db`.
-- Auto-deploy: `.github/workflows/deploy.yml` vid push till `main`.
+- Produktion: Cloudflare Workers Builds triggas från `main` och kör `bun run deploy:production`.
+- GitHub Actions används för CI, säkerhetskontroller och remediation — inte för produktionsdeploy.
 - Observability är aktiverat i `wrangler.jsonc`.
 
 ## Inlämning och granskning
@@ -50,17 +51,22 @@ Worker-tokenen är det verifierade aktiva skyddet för admin-API:t. Cloudflare A
 
 ## Domän
 
-`wrangler.jsonc` äger i nuläget inte custom-domain-routen eftersom deploytokenen saknar zonbehörighet för Workers Routes. Deployworkflowen verifierar därför efter deploy att `klarsprak.denied.se` fortfarande har DNS och att Cloudflare-edgen svarar.
+`wrangler.jsonc` äger custom domains deklarativt:
 
-När tokenen får begränsad `Zone → Workers Routes → Edit` för `denied.se` bör custom domain flyttas tillbaka till deklarativ konfiguration i `wrangler.jsonc`.
+- `klarsprak.denied.se`
+- `xn--klarsprk-g0a.denied.se` (`klarspråk.denied.se`)
+
+Worker-koden redirectar IDN-aliaset till den kanoniska hosten. Cloudflare-buildtokenen måste därför ha den begränsade routebehörighet som Wrangler behöver för dessa custom domains.
 
 ## Databas
 
-Migrationer ligger i `migrations/` och appliceras mot produktion med:
+Migrationer ligger i `migrations/`. Produktionskedjan kör dem automatiskt före Worker-deploy:
 
 ```sh
-bunx wrangler d1 migrations apply klarsprak-db --remote
+wrangler d1 migrations apply klarsprak-db --remote
 ```
+
+Wrangler registrerar applicerade migrationer i D1 och kör bara återstående filer. Manuell körning är reservväg vid felsökning eller återställning, inte normal deploymetod.
 
 ## Utveckling
 
@@ -71,8 +77,10 @@ bunx wrangler dev
 
 ## Deploy
 
+Cloudflare Workers Builds använder:
+
 ```sh
-bunx wrangler deploy
+bun run deploy:production
 ```
 
-Kräver `CLOUDFLARE_API_TOKEN` och `CLOUDFLARE_ACCOUNT_ID`.
+Kommandot kör i ordning D1-migrationer, `wrangler deploy` och en HTTPS-kontroll av produktionsdomänen.
