@@ -9,7 +9,8 @@ Den här filen är repositoryts auktoritativa arbetsinstruktion. Live GitHub-kon
 - Frontend ligger i `public/`.
 - Backend ligger i `src/worker.js` och använder assets-binding samt D1-binding `DB`.
 - Admin-API skyddas med bearer-token mot `ADMIN_TOKEN`.
-- Produktionsdeploy ägs av Cloudflare Workers Builds. Push till `main` triggar `bun run deploy:production`, som applicerar återstående D1-migrationer, deployar Workern och verifierar produktionsdomänen.
+- Produktionsdeploy ägs av Cloudflare Workers Builds. Production trigger på `main` applicerar återstående D1-migrationer, deployar Workern med Wrangler och kör applikationens produktionsverifiering.
+- Cloudflare Workers Builds äger production branch, root directory, watch paths och deploy command. Duplicera inte den kontrollplanslogiken i repo-lokala Node-/shell-wrappers.
 - `wrangler.jsonc` äger Worker-bindings, observability och custom domains deklarativt.
 - `workers.dev` och Preview URLs är explicit avstängda i `wrangler.jsonc`; produktion ska endast exponeras via deklarerade custom domains om inte en senare PR uttryckligen ändrar policyn.
 - Innehållet är pilotmaterial; sakpåståenden och skillnader ska vara källbelagda och juridiskt känsliga ändringar ska flaggas för mänsklig sakkontroll.
@@ -57,15 +58,20 @@ Om auto-merge inte sker ska den konkreta blockeraren i live-ruleset, review-stat
 - `.github/workflows/auto-fix-review.yml` får begära Codex-fix för uttryckligen betrodd review-feedback men får inte lösa review-tråden åt implementationen.
 - Security alerts hanteras centralt av organisationens Skvallerbyttan-flöde; repositoryt ska inte ha en separat schemalagd Code Scanning-poller.
 - GitHub Actions ska inte deploya produktion. Cloudflare Workers Builds är enda normala produktionsdeploykedjan.
-- Cloudflares production deploy command ska vara `bun run deploy:production`.
-- D1-migrationer körs automatiskt i Cloudflare före Worker-deploy. Manuell remote-migrering är endast reservväg för felsökning/återställning.
+- Production trigger ska använda branch `main`, root `/`, tomt build command och avstängda non-production branch builds för produktions-Workern.
+- Production trigger ska använda deploy command `bun run migrate:production && bun run deploy && bun run verify:production`.
+- Build watch paths ska omfatta `src/**`, `public/**`, `migrations/**`, `scripts/check-production-domain.mjs`, `wrangler.jsonc`, `package.json` och `bun.lock`.
+- `migrate:production` ska vara Wranglers native `d1 migrations apply` mot `klarsprak-db --remote`; `deploy` ska vara `wrangler deploy --strict`.
+- D1-migrationer körs automatiskt av Cloudflare-triggern före Worker-deploy. Manuell remote-migrering är endast reservväg för felsökning/återställning.
+- Branch/SHA-kontroll ska inte dupliceras i deployskript. Workers Builds trigger väljer branch och Cloudflare registrerar buildens Git-metadata.
 - Wrangler är source of truth för Worker-routes och publika Worker-ytor. Ändra inte `workers.dev`, Preview URLs eller custom domains endast i Dashboard; motsvarande avsikt ska versionshanteras i `wrangler.jsonc`.
+- Ett repo-lokalt script får finnas för applikationsspecifik post-deploy-verifiering när Cloudflare saknar en native health-check primitive, men scriptet får inte bli en parallell deploymentmotor.
 
 ## Verifiering
 
 Granska hela diffen mot `main` före PR. Kör `bun run test` och andra relevanta kontroller efter varje push. Vid CI-/Wrangler-ändringar ska D1-migrationer från tom lokal databas och `wrangler deploy --dry-run` fortsatt valideras. Kontrollera att inga secrets, credentials, debugrester eller oavsiktliga genererade filer har lagts till.
 
-När ändringen påverkar Cloudflare runtime, bindings, secrets, routes, D1 eller annan live-konfiguration ska den deployade konfigurationen verifieras efter ändringen. För produktionsändringar innebär det normalt att `Workers Builds: klarsprak` på den mergade `main`-SHA:n ska vara grön.
+När ändringen påverkar Cloudflare runtime, bindings, secrets, routes, D1 eller annan live-konfiguration ska den deployade konfigurationen verifieras efter ändringen. För produktionsändringar innebär det normalt att Workers Builds-runnen för `klarsprak` på den mergade `main`-SHA:n ska vara grön och att `verify:production` har passerat i samma production trigger.
 
 ## Svarsformat
 
