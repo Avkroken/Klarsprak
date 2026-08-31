@@ -19,26 +19,37 @@ Den här filen är repositoryts auktoritativa arbetsinstruktion. Live GitHub-kon
 
 - Pusha aldrig direkt till `main`.
 - Använd en kortlivad branch och öppna en ready PR till `main`.
-- **Aktivera auto-merge omedelbart när PR:n skapats**, även medan CI eller review pågår.
-- Använd inte direkt merge om det inte uttryckligen begärts.
-- Live-rulesetet tillåter för närvarande endast squash merge.
+- Auto-merge får inte aktiveras som ett test av repositoryskyddet. Aktivera det först när live-rulesetet har verifierats, required checks för aktuell HEAD är identifierade, strict/latest-base- och security-enforcement är verifierade, relevanta review-trådar är resolved och inga manuella rulesetåtgärder återstår.
+- Om HEAD ändras efter verifiering ska gates och review-state kontrolleras igen innan auto-merge eller merge.
+- Live-rulesetet tillåter endast squash merge.
 - Repositoryt använder inte merge queue och har ingen obligatorisk återanvändbar branchpool.
 - Codex-remediation använder körningsunika branches under `automation/codex-issue/`.
 
 ## Merge-gates
 
-För `main` gäller för närvarande:
+För default branch `main` gäller ett enda aktivt repository-ruleset med följande policy:
 
-- required status check: `validate`
+- deletion av `main` blockeras
+- non-fast-forward/force push blockeras
+- PR krävs före merge
+- required approvals: `0`
+- last-push approval krävs inte
 - olösta review-trådar blockerar merge
-- Copilot Code Review körs vid push till PR-grenen
-- squash är enda tillåtna merge-metod
+- required status checks: `validate` och `osv`
+- `strict_required_status_checks_policy: true`; PR-HEAD ska verifieras mot aktuell `main`
+- Code Scanning merge protection för `CodeQL`: `errors_and_warnings` för code-scanning alerts och `medium_or_higher` för security alerts
+- Copilot Code Review har `review_on_push: true`, granskar inte drafts och är rådgivande, inte en required status check
+- CodeRabbit är best effort och är inte en required status check
+- endast squash merge är tillåten
+- inga bypass actors är tillåtna
+
+Trivy är inte konfigurerad som scanner eller merge-gate i repositoryt. Lägg inte till en Trivy-gate utan att en faktisk stabil PR-verifiering först har införts och observerats.
+
+CodeRabbit-status får vara saknad, pending, rate-limited eller misslyckad utan att detta ensamt blockerar merge. Om CodeRabbit faktiskt publicerar relevanta findings eller review-trådar ska de däremot verifieras och hanteras innan merge. Samma princip gäller rådgivande Copilot-feedback.
 
 Alla review-kommentarer och trådar ska läsas och utvärderas. Relevanta findings åtgärdas i samma PR. En tråd markeras resolved först när eventuell nödvändig fix är pushad och verifierad.
 
-Efter varje ny commit ska relevant CI och review-status kontrolleras igen. När `validate` är grön och alla relevanta review-trådar är resolved ska den redan armerade auto-merge-funktionen föra PR:n till `main`.
-
-Om auto-merge inte sker ska den konkreta blockeraren i live-ruleset, review-state eller repositoryinställning identifieras. Kringgå aldrig repositoryskydd.
+Efter varje ny commit ska `validate`, `osv`, Code Scanning och review-state kontrolleras på exakt den nya HEAD-SHA:n. Gamla checkresultat eller reviews får inte användas som bevis för en ny HEAD.
 
 ## Innehåll och säkerhet
 
@@ -46,15 +57,15 @@ Om auto-merge inte sker ska den konkreta blockeraren i live-ruleset, review-stat
 - Gissa inte sakskillnader eller juridisk betydelse. Bevara tydlig källproveniens.
 - Validera opålitlig input vid server-side boundaries.
 - Adminbehörighet ska verifieras server-side mot `ADMIN_TOKEN`; lita inte på Cloudflare Access utan faktisk verifiering.
-- Hemligheter, tokens och credentials ska ligga i Cloudflare/GitHub secrets och får aldrig hårdkodas eller loggas.
+- Hemligheter, tokens och credentials ska ligga i leverantörernas secret stores och får aldrig hårdkodas eller loggas.
 - GitHub Actions ska pinnas till commit-SHA när praktiskt möjligt.
 
 ## GitHub Actions och Cloudflare
 
 - `.github/workflows/ci.yml` producerar required context `validate` och kör tester, D1-migrationer från tom lokal databas samt Wrangler dry-run.
 - Required `validate` blockerar alla PR:er som fortfarande innehåller `.github/codex-dispatch/issue-*.md`; en remediation-seed får aldrig nå `main`.
-- `.github/workflows/osv-scanner.yml` är kompletterande säkerhetsverifiering och är inte required context i nuvarande ruleset.
-- `.github/workflows/codex-issue-remediation.yml` skapar en körningsunik remediation-branch, öppnar PR och armerar auto-merge direkt.
+- `.github/workflows/osv-scanner.yml` producerar required terminal context `osv`. Det interna reusable-jobbet `scan-pr / osv-scan` är inte självt required. PR-skanningen ska faila stängt om själva scannern inte slutförs.
+- `.github/workflows/codex-issue-remediation.yml` skapar en körningsunik remediation-branch, öppnar PR och delegerar arbetet till Codex. Workflowet får inte armera auto-merge vid PR-skapandet.
 - `.github/workflows/auto-fix-review.yml` får begära Codex-fix för uttryckligen betrodd review-feedback men får inte lösa review-tråden åt implementationen.
 - Security alerts hanteras centralt av organisationens Skvallerbyttan-flöde; repositoryt ska inte ha en separat schemalagd Code Scanning-poller.
 - GitHub Actions ska inte deploya produktion. Cloudflare Workers Builds är enda normala produktionsdeploykedjan.
@@ -79,4 +90,4 @@ När ändringen påverkar Cloudflare runtime, bindings, secrets, routes, D1 elle
 
 ## Definition of done
 
-En PR-baserad uppgift är klar först när implementationen är färdig, diffen självgranskad, all review-feedback utvärderad, required `validate` är grön, relevanta review-trådar är resolved och auto-merge har mergat PR:n eller är armerad medan en verifierad extern gate fortfarande väntar.
+En PR-baserad uppgift är klar först när implementationen är färdig, diffen självgranskad, all review-feedback utvärderad, aktuellt live-ruleset är verifierat, required `validate` och `osv` är gröna på exakt final HEAD, Code Scanning merge protection är godkänd, relevanta review-trådar är resolved och PR:n har mergats via tillåten squash merge eller väntar på en legitim verifierad extern gate.
