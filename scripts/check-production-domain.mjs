@@ -79,7 +79,7 @@ export async function checkProduction({ fetchImpl = fetch, sleep = (ms) => new P
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   checkProduction().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`::error::${message}`);
+    console.error(message);
     process.exit(1);
   });
 }
