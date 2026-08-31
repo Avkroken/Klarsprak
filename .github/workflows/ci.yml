@@ -23,6 +23,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Reject unsafe OSV result-path symlinks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in old-results.json new-results.json results.sarif; do
+            if [[ -L "$path" ]]; then
+              echo "::error::Reserved OSV result path must not be a symlink: $path"
+              exit 1
+            fi
+          done
+
       - name: Blockera ofärdig Codex-remediation
         shell: bash
         run: |
