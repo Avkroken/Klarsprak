@@ -14,8 +14,32 @@ on:
 permissions: {}
 
 jobs:
+  osv-preflight:
+    name: osv-preflight
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Reject unsafe OSV result-path symlinks
+        shell: bash
+        run: |
+          set -euo pipefail
+          unsafe="$(find . -maxdepth 1 -type l \( -name '*old-results.json' -o -name '*new-results.json' -o -name '*results.sarif' \) -print -quit)"
+          if [[ -n "$unsafe" ]]; then
+            echo "::error::Reserved OSV result path must not be a symlink: ${unsafe#./}"
+            exit 1
+          fi
+
   scan-pr:
     if: github.event_name == 'pull_request'
+    needs: [osv-preflight]
     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@8e5cf47b818121e8b405931c82126c2630b0b20d # fail closed when a scan does not complete
     permissions:
       actions: read
@@ -35,7 +59,7 @@ jobs:
   osv:
     name: osv
     if: ${{ always() && github.event_name == 'pull_request' }}
-    needs: [scan-pr]
+    needs: [osv-preflight, scan-pr]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     permissions:
@@ -44,7 +68,9 @@ jobs:
       - name: Verify OSV gate
         shell: bash
         env:
+          PREFLIGHT_RESULT: ${{ needs.osv-preflight.result }}
           PR_RESULT: ${{ needs.scan-pr.result }}
         run: |
           set -euo pipefail
+          [[ "$PREFLIGHT_RESULT" == "success" ]] || { echo "::error::OSV preflight: $PREFLIGHT_RESULT"; exit 1; }
           [[ "$PR_RESULT" == "success" ]] || { echo "::error::OSV PR-skanning: $PR_RESULT"; exit 1; }

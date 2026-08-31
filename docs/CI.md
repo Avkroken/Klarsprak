@@ -13,9 +13,9 @@ Required status checks är:
 
 Båda körs med `strict_required_status_checks_policy: true`. Resultat från en äldre HEAD eller en PR som inte är uppdaterad mot aktuell `main` får därför inte användas som mergebevis.
 
-`validate` kör `bun run test`, applicerar alla D1-migrationer mot en tom lokal databas och gör en Wrangler dry-run. Det blockerar även ofärdiga Codex-remediation-seeds och reserverade OSV-resultatvägar som är symboliska länkar.
+`validate` kör `bun run test`, applicerar alla D1-migrationer mot en tom lokal databas och gör en Wrangler dry-run. Det blockerar även ofärdiga Codex-remediation-seeds.
 
-`osv` är terminaljobbet för dependency scanning. Det underliggande reusable-jobbet `scan-pr / osv-scan` är en implementationdetalj och är inte required. PR-skanningen ska faila om scannerkörningen inte kan slutföras, inte rapportera ett sådant tillstånd som rent.
+`osv` är terminaljobbet för dependency scanning. Ett separat `osv-preflight` i samma workflow kontrollerar PR-checkouten och blockerar reserverade OSV-resultatvägar som är symboliska länkar, även med eventuella matrix-prefix. Det underliggande reusable-jobbet `scan-pr / osv-scan` är en implementationdetalj och är inte required. Terminaljobbet failar om preflight eller scannerkörningen inte slutförs med success.
 
 ## Code Scanning
 

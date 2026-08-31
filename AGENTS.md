@@ -64,7 +64,7 @@ Efter varje ny commit ska `validate`, `osv`, Code Scanning och review-state kont
 
 - `.github/workflows/ci.yml` producerar required context `validate` och kör tester, D1-migrationer från tom lokal databas samt Wrangler dry-run.
 - Required `validate` blockerar alla PR:er som fortfarande innehåller `.github/codex-dispatch/issue-*.md`; en remediation-seed får aldrig nå `main`.
-- `.github/workflows/osv-scanner.yml` producerar required terminal context `osv`. Det interna reusable-jobbet `scan-pr / osv-scan` är inte självt required. PR-skanningen ska faila stängt om själva scannern inte slutförs.
+- `.github/workflows/osv-scanner.yml` producerar required terminal context `osv`. Ett PR-preflight-jobb blockerar reserverade OSV-resultatvägar som är symboliska länkar, även med eventuella matrix-prefix. Det interna reusable-jobbet `scan-pr / osv-scan` är inte självt required. PR-skanningen ska faila stängt om preflight eller själva scannern inte slutförs.
 - `.github/workflows/codex-issue-remediation.yml` skapar en körningsunik remediation-branch, öppnar PR och delegerar arbetet till Codex. Workflowet får inte armera auto-merge vid PR-skapandet.
 - `.github/workflows/auto-fix-review.yml` får begära Codex-fix för uttryckligen betrodd review-feedback men får inte lösa review-tråden åt implementationen.
 - Security alerts hanteras centralt av organisationens Skvallerbyttan-flöde; repositoryt ska inte ha en separat schemalagd Code Scanning-poller.
