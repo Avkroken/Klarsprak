@@ -1,33 +1,28 @@
-name: OSV-Scanner
+name: OSV
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
   schedule:
-    - cron: '50 4 * * 1'
+    - cron: "40 5 * * 1"
   workflow_dispatch:
 
 permissions: {}
 
 jobs:
   osv-preflight:
-    name: osv-preflight
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 2
     permissions:
       contents: read
     steps:
-      - name: Checkout pull request
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Reject unsafe OSV result-path symlinks
+      - name: Reject unsafe OSV result paths
         shell: bash
         run: |
           set -euo pipefail
@@ -47,7 +42,7 @@ jobs:
       security-events: write
 
   scan-main:
-    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'pull_request'
     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
     permissions:
       actions: read
@@ -73,4 +68,4 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$PREFLIGHT_RESULT" == "success" ]] || { echo "::error::OSV preflight: $PREFLIGHT_RESULT"; exit 1; }
-          [[ "$PR_RESULT" == "success" ]] || { echo "::error::OSV PR-skanning: $PR_RESULT"; exit 1; }
+          [[ "$PR_RESULT" == "success" ]] || { echo "::error::OSV PR scan: $PR_RESULT"; exit 1; }
