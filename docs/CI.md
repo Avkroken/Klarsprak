@@ -7,9 +7,8 @@
 Organisationens aktiva rulesets är verkställande sanning. Vid senaste verifieringen gäller för default branch:
 
 - pull request krävs;
-- 1 approval krävs;
-- stale approvals avfärdas efter push;
-- senaste pushen måste godkännas av någon annan än den som gjorde den;
+- required approvals är 0;
+- last-push approval krävs inte;
 - relevanta review-trådar måste vara resolved;
 - deletion och non-fast-forward/force push blockeras;
 - inga bypass actors är konfigurerade;
@@ -26,7 +25,7 @@ Org-rulesetet `main` använder dessutom CodeQL Code Scanning merge protection me
 
 ## Repository-CI
 
-`.github/workflows/ci.yml` producerar `validate`. Den kör projektets tester, applicerar D1-migrationerna mot tom lokal Wrangler-state och gör en Wrangler dry-run. Workflowen verifierar repositoryts kod och Cloudflare-konfiguration men skapar eller uppdaterar inte branches/PR:er, armerar inte auto-merge och innehåller inget Codex-remediationprotokoll.
+`.github/workflows/ci.yml` producerar `validate`. Den blockerar ofärdiga `.github/codex-dispatch/issue-*.md`-seedfiler, kör projektets tester, applicerar D1-migrationerna mot tom lokal Wrangler-state och gör en Wrangler dry-run. Workflowen verifierar repositoryts kod och Cloudflare-konfiguration men skapar eller uppdaterar inte branches/PR:er och armerar inte auto-merge.
 
 `.github/workflows/osv-scanner.yml` producerar required terminal context `osv` på pull requests. PR-flödet är avsiktligt fail-closed:
 

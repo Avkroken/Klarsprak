@@ -40,7 +40,7 @@ Cloudflare Workers platform vulnerabilities should be reported to Cloudflare. Co
 
 ## Merge security enforcement
 
-Organization rulesets are the enforcement truth. At the latest live verification, pull requests to `main` require `validate` and `osv` with strict latest-base enforcement, one approval, stale-review dismissal after push, approval of the latest push by someone other than its author, and resolved review threads. Deletion and non-fast-forward/force push are blocked, squash is the only allowed merge method, and no bypass actors are configured.
+Organization rulesets are the enforcement truth. At the latest live verification, pull requests to `main` require `validate` and `osv` with strict latest-base enforcement, 0 approvals, no last-push approval, and resolved review threads. Deletion and non-fast-forward/force push are blocked, squash is the only allowed merge method, and no bypass actors are configured.
 
 GitHub Code Scanning merge protection is enabled for `CodeQL` with these thresholds:
 
