@@ -23,7 +23,7 @@ Den här filen är repositoryts auktoritativa arbetsinstruktion. Live GitHub-kon
 - Om HEAD ändras efter verifiering ska gates och review-state kontrolleras igen innan auto-merge eller merge.
 - Live-rulesetet tillåter endast squash merge.
 - Repositoryt använder inte merge queue och har ingen obligatorisk återanvändbar branchpool.
-- Codex-remediation använder körningsunika branches under `automation/codex-issue/`.
+- Säkerhetsremediation initieras centralt via GitHubs native funktioner och Skvallerbyttan; fallback-Codex-PR:er använder körningsunika branches under `automation/codex-issue/`.
 
 ## Merge-gates
 
@@ -65,9 +65,9 @@ Efter varje ny commit ska `validate`, `osv`, Code Scanning och review-state kont
 - `.github/workflows/ci.yml` producerar required context `validate` och kör tester, D1-migrationer från tom lokal databas samt Wrangler dry-run.
 - Required `validate` blockerar alla PR:er som fortfarande innehåller `.github/codex-dispatch/issue-*.md`; en remediation-seed får aldrig nå `main`.
 - `.github/workflows/osv-scanner.yml` producerar required terminal context `osv`. Ett PR-preflight-jobb blockerar reserverade OSV-resultatvägar som är symboliska länkar, även med eventuella matrix-prefix. Det interna reusable-jobbet `scan-pr / osv-scan` är inte självt required. PR-skanningen ska faila stängt om preflight eller själva scannern inte slutförs.
-- `.github/workflows/codex-issue-remediation.yml` skapar en körningsunik remediation-branch, öppnar PR och delegerar arbetet till Codex. Workflowet får inte armera auto-merge vid PR-skapandet.
+- Den centrala Skvallerbyttan-dispatchern skapar vid behov en körningsunik remediation-branch, öppnar PR och delegerar fallback-arbetet till Codex; repositoryt ska inte ha en egen security-remediation-dispatcher.
 - `.github/workflows/auto-fix-review.yml` får begära Codex-fix för uttryckligen betrodd review-feedback men får inte lösa review-tråden åt implementationen.
-- Security alerts hanteras centralt av organisationens Skvallerbyttan-flöde; repositoryt ska inte ha en separat schemalagd Code Scanning-poller.
+- Security alerts hanteras native-first av GitHub och därefter centralt av organisationens Skvallerbyttan-flöde; repositoryt ska inte ha en separat schemalagd Code Scanning-poller.
 - GitHub Actions ska inte deploya produktion. Cloudflare Workers Builds är enda normala produktionsdeploykedjan.
 - Production trigger ska använda branch `main`, root `/`, tomt build command och avstängda non-production branch builds för produktions-Workern.
 - Production trigger ska använda deploy command `bun run migrate:production && bun run deploy && bun run verify:production`.
