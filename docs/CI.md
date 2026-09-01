@@ -4,22 +4,41 @@
 
 ## Live merge-enforcement
 
-Repositoryt har ett enda aktivt ruleset för default branch. Det blockerar deletion och non-fast-forward/force push, kräver PR, har inga bypass actors och använder 0 generella approvals. Last-push approval krävs inte, men alla relevanta review-trådar måste vara resolved före merge.
+Organisationens aktiva rulesets är verkställande sanning. Vid senaste verifieringen gäller för default branch:
+
+- pull request krävs;
+- 1 approval krävs;
+- stale approvals avfärdas efter push;
+- senaste pushen måste godkännas av någon annan än den som gjorde den;
+- relevanta review-trådar måste vara resolved;
+- deletion och non-fast-forward/force push blockeras;
+- inga bypass actors är konfigurerade;
+- endast squash merge är tillåtet.
 
 Required status checks är:
 
 - `validate`
 - `osv`
 
-Båda körs med `strict_required_status_checks_policy: true`. Resultat från en äldre HEAD eller en PR som inte är uppdaterad mot aktuell `main` får därför inte användas som mergebevis.
+Båda körs med `strict_required_status_checks_policy: true`, så verifieringen måste gälla exakt aktuell PR-HEAD mot aktuell `main`.
 
-`validate` kör `bun run test`, applicerar alla D1-migrationer mot en tom lokal databas och gör en Wrangler dry-run. Det blockerar även ofärdiga Codex-remediation-seeds.
+Org-rulesetet `main` använder dessutom CodeQL Code Scanning merge protection med `medium_or_higher` för security alerts och `errors_and_warnings` för övriga alerts. Samma org-ruleset refererar fortfarande till Regelverkets `.github/workflows/osv-scanner.yml` som central required workflow; det är organisationsnivå och måste ändras separat när den centrala OSV-kopplingen tas bort.
 
-`osv` är terminaljobbet för dependency scanning. Ett separat `osv-preflight` i samma workflow kontrollerar PR-checkouten och blockerar reserverade OSV-resultatvägar som är symboliska länkar, även med eventuella matrix-prefix. Det underliggande reusable-jobbet `scan-pr / osv-scan` är en implementationdetalj och är inte required. Terminaljobbet failar om preflight eller scannerkörningen inte slutförs med success.
+## Repository-CI
+
+`.github/workflows/ci.yml` producerar `validate`. Den kör projektets tester, applicerar D1-migrationerna mot tom lokal Wrangler-state och gör en Wrangler dry-run. Workflowen verifierar repositoryts kod och Cloudflare-konfiguration men skapar eller uppdaterar inte branches/PR:er, armerar inte auto-merge och innehåller inget Codex-remediationprotokoll.
+
+`.github/workflows/osv-scanner.yml` producerar required terminal context `osv` på pull requests. PR-flödet är avsiktligt fail-closed:
+
+- `osv-preflight` checkar ut PR-HEAD och blockerar reserverade OSV-resultatvägar som är symboliska länkar;
+- `scan-pr` använder den pinnade fail-closed revision som valts för att inte acceptera ofullständiga scannerkörningar;
+- terminaljobbet `osv` kräver explicit `success` från både preflight och PR-scanner.
+
+Scanning på `main`, schema och manual används för kompletterande rapportering och är inte den terminala PR-gaten.
 
 ## Code Scanning
 
-GitHubs Code Scanning merge protection används för verktyget `CodeQL`:
+GitHubs Code Scanning merge protection används för `CodeQL`:
 
 - code-scanning alerts: `errors_and_warnings`
 - security alerts: `medium_or_higher`
@@ -28,12 +47,8 @@ Trivy är inte konfigurerad i repositoryt och är därför inte en merge-gate.
 
 ## Review
 
-Copilot Code Review använder `review_on_push: true`, undantar drafts och är rådgivande. Quota- eller tillgänglighetsproblem för Copilot blockerar inte merge i sig.
+Copilot Code Review och CodeRabbit är rådgivande och inte required status checks. Quota-, rate-limit- eller tillgänglighetsproblem blockerar inte ensamt merge. Faktiska relevanta findings ska däremot utvärderas, och relevanta review-trådar måste vara resolved före merge.
 
-CodeRabbit är best effort och är inte en required status check. Saknad, pending, rate-limited eller misslyckad CodeRabbit-status blockerar inte merge i sig. Om CodeRabbit faktiskt lämnar relevanta findings eller review-trådar ska de verifieras, åtgärdas när de är giltiga och lösas först efter verifierad fix.
+## Deploy
 
-## Auto-merge
-
-Auto-merge får inte armeras som ett test av GitHubs skydd. Aktivera det först när live-rulesetet är verifierat, required checks för aktuell HEAD är identifierade, strict- och security-enforcement är verifierade, relevanta review-trådar är resolved och inga manuella rulesetåtgärder återstår. Om HEAD ändras ska verifieringen göras om.
-
-PR-verifiering hör till `pull_request`; deploy och annan efter-merge-körning hör till `main`. GitHub Actions deployar inte produktion. Cloudflare Workers Builds äger production deployment.
+GitHub Actions deployar inte produktion. Cloudflare Workers Builds äger normal production deployment från `main`. `wrangler.jsonc` är source of truth för versionshanterad Worker-konfiguration och runtime-secrets ligger i Cloudflare, inte i GitHub Actions eller repositoryfiler.
