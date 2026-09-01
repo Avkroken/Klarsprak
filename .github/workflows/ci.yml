@@ -8,9 +8,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
+    name: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -19,9 +25,17 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run test
       - name: Validate migrations
+        shell: bash
         run: |
+          set -euo pipefail
           rm -rf .wrangler/state
-          for migration in migrations/*.sql; do
+          shopt -s nullglob
+          migrations=(migrations/*.sql)
+          if (( ${#migrations[@]} == 0 )); then
+            echo "::error::No D1 migrations found."
+            exit 1
+          fi
+          for migration in "${migrations[@]}"; do
             bunx wrangler d1 execute klarsprak-db --local --file "$migration"
           done
       - run: bunx wrangler deploy --dry-run --outdir .wrangler/dry-run
