@@ -50,7 +50,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-      security-events: write
+      security-events: none
     with:
       fail-on-vuln: true
       upload-sarif: false
