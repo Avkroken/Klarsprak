@@ -33,11 +33,24 @@ Efter varje push ska required checks, Code Scanning och review-state verifieras 
 
 - `.github/workflows/ci.yml` producerar `validate`, blockerar ofärdiga remediation-seedfiler och kör tester, lokala D1-migrationer från tom state samt Wrangler dry-run.
 - `.github/workflows/osv-scanner.yml` är repositoryts egen OSV-definition och producerar required terminal context `osv` på pull requests.
-- Repositoryts workflows får inte skapa eller uppdatera PR:er eller branches, arma eller genomföra merge, automatisera review, delegera arbete till AI-agenter eller lagra säkerhetsalert-snapshots.
+- Repositoryts workflows får inte skapa eller uppdatera PR:er eller branches, arma eller genomföra merge, automatisera review, delegera remediation/kodarbete till AI-agenter eller lagra säkerhetsalert-snapshots. De centrala metadata-callers som beskrivs nedan är det enda metadata-only-undantaget och får inte ändra branch, review eller merge-state.
 - Security alerts hanteras av GitHubs native säkerhetsfunktioner och kodändringar går genom normala PR-gates.
 - GitHub Actions ska pinnas till full commit-SHA.
 - Production trigger ska använda branch `main`, root `/`, tomt build command och deploy command `bun run migrate:production && bun run deploy && bun run verify:production`.
 - `migrate:production` använder Wranglers native D1 migrations och `deploy` använder `wrangler deploy --strict`.
+
+## Metadata-only AI triage exception
+
+Repositoryägaren har uttryckligen godkänt metadata-only issue triage via GitHub Agentic Workflows. Detta är klassificering, inte coding-agent delegation eller remediation.
+
+- `.github/workflows/metadata-routing.yml` får endast anropa Avkrokens centrala deterministiska metadata-routing för assignee och labels.
+- `.github/workflows/issue-classification.yml` får endast trigga på öppnade/återöppnade issues och anropa den SHA-pinnade centrala `issue-classification.lock.yml`.
+- AI-delen får läsa det triggande issuet och read-only repositorykontext som behövs för klassificering.
+- `gh-aw` safe outputs får endast lägga till exakt en `difficulty:*` och en `security:*` label från den centrala allowlisten.
+- Workflowen får inte kommentera, assigna coding agents, skapa/ändra branches eller PR:er, reviewa, mergea, deploya eller utföra/föreslå remediation.
+- Copilot-auth får komma från organization billing eller GitHub Actions-secreten `COPILOT_GITHUB_TOKEN`. Credentialvärden får aldrig committas, loggas eller kopieras till dokumentation.
+
+Detta undantag ändrar inte Cloudflare-, CI-, security-, review- eller mergepolicyn.
 
 ## Verifiering
 
