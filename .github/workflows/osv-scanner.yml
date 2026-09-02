@@ -3,6 +3,8 @@ name: OSV
 on:
   pull_request:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
   schedule:
@@ -13,7 +15,7 @@ permissions: {}
 
 jobs:
   osv-preflight:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     timeout-minutes: 2
     permissions:
@@ -41,8 +43,20 @@ jobs:
       contents: read
       security-events: write
 
+  scan-merge-group:
+    if: github.event_name == 'merge_group'
+    needs: [osv-preflight]
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    with:
+      fail-on-vuln: true
+      upload-sarif: false
+
   scan-main:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
     permissions:
       actions: read
@@ -53,8 +67,8 @@ jobs:
 
   osv:
     name: osv
-    if: ${{ always() && github.event_name == 'pull_request' }}
-    needs: [osv-preflight, scan-pr]
+    if: ${{ always() && (github.event_name == 'pull_request' || github.event_name == 'merge_group') }}
+    needs: [osv-preflight, scan-pr, scan-merge-group]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     permissions:
@@ -63,9 +77,15 @@ jobs:
       - name: Verify OSV gate
         shell: bash
         env:
+          EVENT_NAME: ${{ github.event_name }}
           PREFLIGHT_RESULT: ${{ needs.osv-preflight.result }}
           PR_RESULT: ${{ needs.scan-pr.result }}
+          MERGE_GROUP_RESULT: ${{ needs.scan-merge-group.result }}
         run: |
           set -euo pipefail
           [[ "$PREFLIGHT_RESULT" == "success" ]] || { echo "::error::OSV preflight: $PREFLIGHT_RESULT"; exit 1; }
-          [[ "$PR_RESULT" == "success" ]] || { echo "::error::OSV PR scan: $PR_RESULT"; exit 1; }
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            [[ "$PR_RESULT" == "success" ]] || { echo "::error::OSV PR scan: $PR_RESULT"; exit 1; }
+          else
+            [[ "$MERGE_GROUP_RESULT" == "success" ]] || { echo "::error::OSV merge-group scan: $MERGE_GROUP_RESULT"; exit 1; }
+          fi
