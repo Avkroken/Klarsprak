@@ -46,14 +46,40 @@ jobs:
   scan-merge-group:
     if: github.event_name == 'merge_group'
     needs: [osv-preflight]
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
-      actions: read
       contents: read
-      security-events: write
-    with:
-      fail-on-vuln: true
-      upload-sarif: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run OSV scanner
+        id: scan
+        uses: google/osv-scanner-action/osv-scanner-action@baa4139e56d6312335d899e6ba045fa16d1d3d0b # v2.5.1
+        env:
+          GOTOOLCHAIN: auto
+        with:
+          scan-args: |-
+            --output=results.json
+            --format=json
+            -r
+            ./
+        continue-on-error: true
+      - name: Require complete OSV results
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s results.json || { echo "::error::OSV scan did not produce results.json"; exit 1; }
+          jq -e . results.json >/dev/null || { echo "::error::OSV scan produced invalid JSON"; exit 1; }
+      - name: Enforce vulnerability gate
+        uses: google/osv-scanner-action/osv-reporter-action@baa4139e56d6312335d899e6ba045fa16d1d3d0b # v2.5.1
+        with:
+          scan-args: |-
+            --output=results.sarif
+            --new=results.json
+            --gh-annotations=false
+            --fail-on-vuln=true
 
   scan-main:
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
