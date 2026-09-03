@@ -1,53 +1,13 @@
-# CI och branchflöde
+# CI och deploy
 
-`main` är default branch. Varje ändring görs på en kortlivad branch och går via en ready PR till `main`. Squash merge är den enda tillåtna merge-metoden.
+Repositoryts required status checks är `validate` och `osv`. Båda styrs av det aktiva organization-level rulesetet `klarsprak` med strict latest-base-verifiering.
 
-## Live merge-enforcement
+`.github/workflows/ci.yml` producerar `validate`, blockerar ofärdiga `.github/codex-dispatch/issue-*.md`-seedfiler, kör projektets tester, applicerar D1-migrationer mot tom lokal Wrangler-state och gör Wrangler dry-run.
 
-Organisationens aktiva rulesets är verkställande sanning. Vid senaste verifieringen gäller för default branch:
+`.github/workflows/osv-scanner.yml` producerar repositoryts required terminal context `osv`. PR-flödet är fail-closed: `osv-preflight` verifierar PR-HEAD, `scan-pr` kör den pinnade scannern och terminaljobbet `osv` kräver explicit success från båda.
 
-- pull request krävs;
-- required approvals är 0;
-- last-push approval krävs inte;
-- relevanta review-trådar måste vara resolved;
-- deletion och non-fast-forward/force push blockeras;
-- inga bypass actors är konfigurerade;
-- endast squash merge är tillåtet.
+Organisationens `main`-ruleset kräver dessutom den centrala OSV-workflowen från `Avkroken/.github`. På vanliga pull requests kör den `scan-pr`; i merge queue kör den `scan-merge-group`. Den centrala workflowen är en required workflow, inte en separat organization-level required status check med namnet `scan-pr / osv-scan`.
 
-Required status checks är:
+CodeQL merge protection, review-thread resolution, squash-only och övriga gemensamma merge-regler hanteras centralt av organisationens aktiva rulesets. Repositoryt använder merge queue.
 
-- `validate`
-- `osv`
-
-Båda körs med `strict_required_status_checks_policy: true`, så verifieringen måste gälla exakt aktuell PR-HEAD mot aktuell `main`.
-
-Org-rulesetet `main` använder dessutom CodeQL Code Scanning merge protection med `medium_or_higher` för security alerts och `errors_and_warnings` för övriga alerts. Samma org-ruleset refererar fortfarande till Regelverkets `.github/workflows/osv-scanner.yml` som central required workflow; det är organisationsnivå och måste ändras separat när den centrala OSV-kopplingen tas bort.
-
-## Repository-CI
-
-`.github/workflows/ci.yml` producerar `validate`. Den blockerar ofärdiga `.github/codex-dispatch/issue-*.md`-seedfiler, kör projektets tester, applicerar D1-migrationerna mot tom lokal Wrangler-state och gör en Wrangler dry-run. Workflowen verifierar repositoryts kod och Cloudflare-konfiguration men skapar eller uppdaterar inte branches/PR:er och armerar inte auto-merge.
-
-`.github/workflows/osv-scanner.yml` producerar required terminal context `osv` på pull requests. PR-flödet är avsiktligt fail-closed:
-
-- `osv-preflight` checkar ut PR-HEAD och blockerar reserverade OSV-resultatvägar som är symboliska länkar;
-- `scan-pr` använder den pinnade fail-closed revision som valts för att inte acceptera ofullständiga scannerkörningar;
-- terminaljobbet `osv` kräver explicit `success` från både preflight och PR-scanner.
-
-Scanning på `main`, schema och manual används för kompletterande rapportering och är inte den terminala PR-gaten.
-
-## Code Scanning
-
-GitHubs Code Scanning merge protection används för `CodeQL`:
-
-- code-scanning alerts: `errors_and_warnings`
-- security alerts: `medium_or_higher`
-
-Trivy är inte konfigurerad i repositoryt och är därför inte en merge-gate.
-
-## Review
-
-Copilot Code Review och CodeRabbit är rådgivande och inte required status checks. Quota-, rate-limit- eller tillgänglighetsproblem blockerar inte ensamt merge. Faktiska relevanta findings ska däremot utvärderas, och relevanta review-trådar måste vara resolved före merge.
-
-## Deploy
-
-GitHub Actions deployar inte produktion. Cloudflare Workers Builds äger normal production deployment från `main`. `wrangler.jsonc` är source of truth för versionshanterad Worker-konfiguration och runtime-secrets ligger i Cloudflare, inte i GitHub Actions eller repositoryfiler.
+GitHub Actions deployar inte produktion. Cloudflare Workers Builds äger normal production deployment från `main`. `wrangler.jsonc` är source of truth för versionshanterad Worker-konfiguration och runtime-secrets ligger i Cloudflare.
