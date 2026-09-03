@@ -3,6 +3,8 @@ name: Central metadata routing
 on:
   issues:
     types: [labeled, unlabeled]
+  pull_request_target:
+    types: [labeled, unlabeled]
   schedule:
     - cron: '39 * * * *'
   workflow_dispatch:
@@ -14,4 +16,4 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    uses: Avkroken/.github/.github/workflows/metadata-orchestration.yml@980d67fa6e18a4800dd90fdf5cd8f463b236de6c
+    uses: Avkroken/.github/.github/workflows/metadata-orchestration.yml@2baaff1ee7c0193908076328c530b5f2ef9acda6
