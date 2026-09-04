@@ -10,7 +10,7 @@ updates:
     groups:
       actions-patch-minor:
         update-types: ["minor", "patch"]
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     assignees: ["blixten85"]
     directory: "/"
     schedule:
@@ -18,5 +18,5 @@ updates:
       time: "05:00"
       timezone: "Europe/Stockholm"
     groups:
-      npm-patch-minor:
+      bun-patch-minor:
         update-types: ["minor", "patch"]
