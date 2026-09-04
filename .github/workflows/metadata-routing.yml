@@ -3,8 +3,6 @@ name: Central metadata routing
 on:
   issues:
     types: [labeled, unlabeled]
-  pull_request_target:
-    types: [labeled, unlabeled]
   schedule:
     - cron: '39 * * * *'
   workflow_dispatch:
