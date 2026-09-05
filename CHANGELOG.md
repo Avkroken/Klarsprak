@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/Avkroken/Klarsprak/compare/v1.0.2...v1.0.3) (2026-09-05)
+
+
+### Documentation
+
+* clarify repository-specific governance ([#130](https://github.com/Avkroken/Klarsprak/issues/130)) ([553d5a2](https://github.com/Avkroken/Klarsprak/commit/553d5a217eba76be4f13b809aea18d5992adc728))
+
 ## [1.0.2](https://github.com/Avkroken/Klarsprak/compare/v1.0.1...v1.0.2) (2026-09-05)
 
 
