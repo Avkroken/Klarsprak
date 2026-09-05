@@ -2,6 +2,14 @@
 const CANONICAL_HOST = "klarsprak.denied.se";
 const CANONICAL_ALIAS_HOST = "xn--klarsprk-g0a.denied.se";
 
+export function d1SessionConstraint(method, pathname) {
+  return method === "GET" && pathname === "/api/terms" ? "first-unconstrained" : "first-primary";
+}
+
+export function withD1Session(env, constraint) {
+  return Object.assign(Object.create(env), { DB: env.DB.withSession(constraint) });
+}
+
 const MAX_LEN = {
   term: 200,
   foreslagen_juridisk_definition: 4000,
@@ -241,6 +249,7 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
     if (url.hostname === CANONICAL_ALIAS_HOST) { url.hostname = CANONICAL_HOST; return Response.redirect(url.toString(), 301); }
+    if (pathname.startsWith("/api/")) env = withD1Session(env, d1SessionConstraint(request.method, pathname));
     if (request.method === "GET" && pathname === "/api/terms") return handleTerms(env);
     if (request.method === "POST" && pathname === "/api/submit") return handleSubmit(request, env);
     if (request.method === "GET" && pathname === "/api/admin/queue") return handleAdminQueue(request, env);
