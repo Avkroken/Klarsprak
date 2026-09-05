@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/Avkroken/Klarsprak/compare/v1.0.1...v1.0.2) (2026-09-05)
+
+
+### Documentation
+
+* rename governance file to REPO.md ([#128](https://github.com/Avkroken/Klarsprak/issues/128)) ([4014be9](https://github.com/Avkroken/Klarsprak/commit/4014be9ab761822e4673d0be978786f02ac797be))
+
 ## [1.0.1](https://github.com/Avkroken/Klarsprak/compare/v1.0.0...v1.0.1) (2026-09-05)
 
 
