@@ -6,6 +6,18 @@ export function d1SessionConstraint(method, pathname) {
   return method === "GET" && pathname === "/api/terms" ? "first-unconstrained" : "first-primary";
 }
 
+export function isD1ApiRoute(method, pathname) {
+  if (method === "GET") {
+    return pathname === "/api/terms" || pathname === "/api/admin/queue" || pathname === "/api/admin/terms";
+  }
+  if (method === "POST") {
+    return pathname === "/api/submit"
+      || /^\/api\/admin\/review\/[^/]+$/.test(pathname)
+      || /^\/api\/admin\/terms\/[^/]+\/status$/.test(pathname);
+  }
+  return method === "PUT" && /^\/api\/admin\/terms\/[^/]+$/.test(pathname);
+}
+
 export function withD1Session(env, constraint) {
   return Object.assign(Object.create(env), { DB: env.DB.withSession(constraint) });
 }
@@ -249,7 +261,7 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
     if (url.hostname === CANONICAL_ALIAS_HOST) { url.hostname = CANONICAL_HOST; return Response.redirect(url.toString(), 301); }
-    if (pathname.startsWith("/api/")) env = withD1Session(env, d1SessionConstraint(request.method, pathname));
+    if (isD1ApiRoute(request.method, pathname)) env = withD1Session(env, d1SessionConstraint(request.method, pathname));
     if (request.method === "GET" && pathname === "/api/terms") return handleTerms(env);
     if (request.method === "POST" && pathname === "/api/submit") return handleSubmit(request, env);
     if (request.method === "GET" && pathname === "/api/admin/queue") return handleAdminQueue(request, env);
