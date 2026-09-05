@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   queue:
-    uses: Avkroken/.github/.github/workflows/dependabot-automerge.yml@abfaf7aae8a69f1dfa6bc7e01440496edb59def6
+    uses: Avkroken/.github/.github/workflows/dependabot-automerge.yml@8c05288325c7646972c4c6ba0d4493a84152d7d8
     with:
       app-client-id: ${{ vars.GAMNACKEN_CLIENT_ID }}
     secrets:
