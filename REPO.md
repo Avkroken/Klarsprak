@@ -12,7 +12,7 @@
 
 ## Validation
 
-Run `bun run test` for relevant changes. For CI, Wrangler or D1 changes, validate migrations from an empty local state and run Wrangler dry-run validation.
+Run `bun run test` for relevant changes. For CI, Wrangler or D1 changes, validate migrations from an empty local state and run `wrangler deploy --dry-run`.
 
 The live repository rules currently require `validate` and `osv`. Do not rename a required check without updating and verifying the live ruleset in the same migration.
 
