@@ -1,19 +1,16 @@
 # REPO.md
 
-`klarsprak` is a Cloudflare Workers prototype with frontend under `public/`, backend in `src/worker.js`, D1 migrations in `migrations/` and versioned Worker configuration in `wrangler.jsonc`.
+`Klarsprak` är en Cloudflare Workers-prototyp med frontend under `public/`, backend i `src/worker.js`, D1-migreringar i `migrations/` och versionshanterad Worker-konfiguration i `wrangler.jsonc`.
 
-## Invariants
+## Invarians
 
-- Factual/legal claims must be source-backed; do not guess.
-- Validate untrusted input server-side. Admin authorization is verified server-side against `ADMIN_TOKEN`.
-- Never hardcode or log secrets, tokens or credentials.
-- Cloudflare Workers Builds owns production deployment from `main`; GitHub Actions validates but does not duplicate deployment.
-- Schema changes use Wrangler-native D1 migrations.
+- Faktiska och juridiska påståenden ska ha källstöd; gissa inte.
+- Validera opålitlig input server-side.
+- Admin-auktorisering verifieras server-side mot `ADMIN_TOKEN`.
+- Hemligheter, tokens och credentials får inte hårdkodas eller loggas.
+- Produktionsdistribution från `main` hanteras av Cloudflare Workers Builds.
+- Schemaändringar använder Wrangler-baserade D1-migreringar.
 
-## Validation
+## Validering
 
-Run `bun run test` for relevant changes. For CI, Wrangler or D1 changes, validate migrations from an empty local state and run `wrangler deploy --dry-run`.
-
-The live repository rules currently require `validate` and `osv`. Do not rename a required check without updating and verifying the live ruleset in the same migration.
-
-Pin third-party GitHub Actions to full commit SHAs.
+Kör `bun run test` för relevanta ändringar. Vid Wrangler- eller D1-ändringar, validera migreringar från tom lokal state och kör `wrangler deploy --dry-run`.
