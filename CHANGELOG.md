@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/Avkroken/Klarsprak/compare/v1.0.3...v1.0.4) (2026-09-06)
+
+
+### Documentation
+
+* förenkla REPO.md på svenska ([#137](https://github.com/Avkroken/Klarsprak/issues/137)) ([c13f1f2](https://github.com/Avkroken/Klarsprak/commit/c13f1f26733828ee1ba0064a9d0e30694e16c61b))
+
 ## [1.0.3](https://github.com/Avkroken/Klarsprak/compare/v1.0.2...v1.0.3) (2026-09-05)
 
 
