@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.5](https://github.com/Avkroken/Klarsprak/compare/v1.0.4...v1.0.5) (2026-09-06)
+
+
+### Documentation
+
+* remove duplicated GitHub governance ([e171e4f](https://github.com/Avkroken/Klarsprak/commit/e171e4f6ec969ea82c9b3b28638bee56215ab263))
+* rensa duplicerad GitHub-governance ([#143](https://github.com/Avkroken/Klarsprak/issues/143)) ([e171e4f](https://github.com/Avkroken/Klarsprak/commit/e171e4f6ec969ea82c9b3b28638bee56215ab263))
+
 ## [1.0.4](https://github.com/Avkroken/Klarsprak/compare/v1.0.3...v1.0.4) (2026-09-06)
 
 
