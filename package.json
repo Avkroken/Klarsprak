@@ -10,6 +10,6 @@
     "verify:production": "node scripts/check-production-domain.mjs"
   },
   "devDependencies": {
-    "wrangler": "^4.127.1"
+    "wrangler": "^4.129.0"
   }
 }
