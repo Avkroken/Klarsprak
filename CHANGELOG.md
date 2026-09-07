@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.6](https://github.com/Avkroken/Klarsprak/compare/v1.0.5...v1.0.6) (2026-09-07)
+
+
+### Documentation
+
+* document repository governance ([bb96345](https://github.com/Avkroken/Klarsprak/commit/bb96345ce1407580f91c7e4b3630915f09f1b67a))
+* dokumentera repository-styrning ([#146](https://github.com/Avkroken/Klarsprak/issues/146)) ([bb96345](https://github.com/Avkroken/Klarsprak/commit/bb96345ce1407580f91c7e4b3630915f09f1b67a))
+
 ## [1.0.5](https://github.com/Avkroken/Klarsprak/compare/v1.0.4...v1.0.5) (2026-09-06)
 
 
