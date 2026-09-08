@@ -12,20 +12,22 @@ GitHub Code Scanning default setup is already active and has produced successful
 
 ## Selected starter templates
 
-- `code-scanning/dependency-review.yml`: used for pull requests to `main`. Action major versions are pinned to the exact commits already accepted by the organization Actions policy, without adding workflow logic.
+- `code-scanning/dependency-review.yml`: used for pull requests to `main`. It has run successfully on this branch and produces the exact job/check name `dependency-review`.
 - `.github/dependabot.yml`: kept in the starter configuration structure, filled for the repository's actual `bun` and `github-actions` ecosystems, both weekly.
 
 ## Templates attempted or intentionally not used
 
 ### OSV-Scanner
 
-The current `code-scanning/osv-scanner.yml` starter was first added essentially as published, with `main` and the weekly cron placeholder filled. Its first pull-request run ended in `startup_failure` before GitHub created any jobs.
+The current `code-scanning/osv-scanner.yml` starter was tested as published, with `main` and the weekly cron placeholder filled.
 
-The repository rulesets `required-ci` and `dev-pilot` were then disabled live and the exact same GitHub starter workflow was re-added and retried. The retry again ended in `startup_failure` before GitHub created any jobs. The inherited organization ruleset `main` was also verified to contain no required status checks, only branch and pull-request protections. This isolates the repository rulesets as not being the cause of the OSV startup failure.
+The first attempts ended in `startup_failure` before GitHub created any jobs. Repository rulesets `required-ci` and `dev-pilot` were disabled live, while the inherited organization ruleset `main` was verified to contain no required status checks. The same startup failure still occurred, proving the repository rulesets were not the cause.
 
-The reusable workflow at the exact commit referenced by the current starter template is resolvable, but its contents include multiple mutable action version references. The connector does not expose a more specific startup diagnostic, so the exact policy rejection is not asserted as proven. What is verified is that the current starter workflow cannot start in this repository as-is even with the repository rulesets disabled.
+The effective Actions policy was then inspected. Both the organization and repository used `allowed_actions: selected`, allowed `google/*`, and required SHA pinning. After `sha_pinning_required` was disabled at both levels, the exact same GitHub OSV starter workflow progressed past startup and created the job `scan-pr / scan-pr`.
 
-Because changing or wrapping that workflow to make it pass would create repository-specific workflow logic outside the current starter template, OSV-Scanner is removed and recorded as a coverage gap.
+That job then failed during action preparation with GitHub's explicit error that the upstream reusable workflow uses deprecated `actions/upload-artifact` v3 at commit `a8a3f3ad30e3422c9c7b888a15615d19a852ae32`. GitHub no longer permits that artifact-action version.
+
+Therefore the current GitHub OSV starter template cannot complete successfully in this repository as published. Fixing the upstream reusable workflow or replacing its action references locally would move outside the GitHub starter template's frame, so OSV-Scanner is removed and recorded as a coverage gap.
 
 ### Node.js CI
 
@@ -45,6 +47,6 @@ The former repository workflow delegated to an organization-specific Release Ple
 
 The live repository `required-ci` ruleset still contains the old custom checks `validate` and `osv`, but its enforcement is currently disabled. The live `dev-pilot` ruleset is also disabled. Those old check names must not be copied into the target ruleset after the workflows are replaced.
 
-The remaining Dependency Review starter workflow has run successfully on this branch with the exact job/check name `dependency-review`. The repository-specific target ruleset file therefore requires only `dependency-review`.
+The remaining Dependency Review starter workflow has run successfully with the exact job/check name `dependency-review`. The repository-specific target ruleset file therefore requires only `dependency-review`.
 
 No CodeQL status check is proposed as a universal organization-level required check: GitHub default setup emits language-dependent dynamic CodeQL check names across repositories rather than one stable check context applicable everywhere.
