@@ -21,7 +21,9 @@ GitHub Code Scanning default setup is already active and has produced successful
 
 The current `code-scanning/osv-scanner.yml` starter was first added essentially as published, with `main` and the weekly cron placeholder filled. Its first pull-request run ended in `startup_failure` before GitHub created any jobs.
 
-The reusable workflow at the exact commit referenced by the current starter template is resolvable, but its contents include multiple mutable action version references. The connector does not expose a more specific startup diagnostic, so the exact policy rejection is not asserted as proven. What is verified is that the current starter workflow cannot start in this repository as-is.
+The repository rulesets `required-ci` and `dev-pilot` were then disabled live and the exact same GitHub starter workflow was re-added and retried. The retry again ended in `startup_failure` before GitHub created any jobs. The inherited organization ruleset `main` was also verified to contain no required status checks, only branch and pull-request protections. This isolates the repository rulesets as not being the cause of the OSV startup failure.
+
+The reusable workflow at the exact commit referenced by the current starter template is resolvable, but its contents include multiple mutable action version references. The connector does not expose a more specific startup diagnostic, so the exact policy rejection is not asserted as proven. What is verified is that the current starter workflow cannot start in this repository as-is even with the repository rulesets disabled.
 
 Because changing or wrapping that workflow to make it pass would create repository-specific workflow logic outside the current starter template, OSV-Scanner is removed and recorded as a coverage gap.
 
@@ -41,8 +43,8 @@ The former repository workflow delegated to an organization-specific Release Ple
 
 ## Ruleset evidence and rollout gate
 
-The live repository `required-ci` ruleset currently requires the old custom checks `validate` and `osv`. Those names must not be copied into the target ruleset after the workflows are replaced.
+The live repository `required-ci` ruleset still contains the old custom checks `validate` and `osv`, but its enforcement is currently disabled. The live `dev-pilot` ruleset is also disabled. Those old check names must not be copied into the target ruleset after the workflows are replaced.
 
-The repository-specific target ruleset will only be written after the remaining Dependency Review starter workflow has run successfully on this branch and its exact job/check name has been observed. The existing `dev-pilot` ruleset contains branch/review protections but no required status checks, so it does not invent workflow checks.
+The remaining Dependency Review starter workflow has run successfully on this branch with the exact job/check name `dependency-review`. The repository-specific target ruleset file therefore requires only `dependency-review`.
 
 No CodeQL status check is proposed as a universal organization-level required check: GitHub default setup emits language-dependent dynamic CodeQL check names across repositories rather than one stable check context applicable everywhere.
