@@ -22,6 +22,8 @@ on:
     branches: [ main ]
 
 permissions:
+  # Read workflow run data required by current OSV reusable workflows
+  actions: read
   # Require writing security events to upload SARIF file to security tab
   security-events: write
   # Read commit contents
