@@ -26,7 +26,6 @@ Den tidigare modellen med fältet **"vad människor tror"** används inte längr
 - Assets-binding: `public/`.
 - D1-binding: `DB` mot `klarsprak-db`.
 - Produktion: Cloudflare Workers Builds äger build trigger och produktionsdeploy från `main`.
-- GitHub Actions används för PR-validering, säkerhetskontroller och remediation — inte för produktionsdeploy.
 - `wrangler.jsonc` är source of truth för Worker-konfiguration, bindings, routes, observability och publika Worker-ytor.
 - `workers.dev` och Worker Preview URLs är explicit avstängda; produktion exponeras endast via deklarerade custom domains.
 
