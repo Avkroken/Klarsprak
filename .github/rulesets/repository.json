@@ -14,7 +14,8 @@
       "parameters": {
         "strict_required_status_checks_policy": true,
         "required_status_checks": [
-          { "context": "dependency-review" }
+          { "context": "dependency-review" },
+          { "context": "scan-pr / osv-scan" }
         ]
       }
     }
