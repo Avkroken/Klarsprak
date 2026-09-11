@@ -94,10 +94,26 @@ function validatePublication(p) {
 
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
-async function isRateLimited(env, ip) {
-  if (!ip) return false;
+
+export async function rateLimitIdentity(ip, secret) {
+  if (!ip || !secret) return null;
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const digest = await crypto.subtle.sign("HMAC", key, encoder.encode(ip));
+  const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+  return `hmac-sha256:${hex}`;
+}
+
+async function isRateLimited(env, identity) {
+  if (!identity) return false;
   const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
-  const row = await env.DB.prepare(`SELECT COUNT(*) AS n FROM submissions WHERE submitter_ip = ? AND created_at > ?`).bind(ip, since).first();
+  const row = await env.DB.prepare(`SELECT COUNT(*) AS n FROM submissions WHERE submitter_ip = ? AND created_at > ?`).bind(identity, since).first();
   return Number(row?.n || 0) >= RATE_LIMIT_MAX;
 }
 function timingSafeEqual(a, b) {
@@ -149,7 +165,9 @@ async function handleSubmit(request, env) {
   const error = validateSubmission(body);
   if (error) return badRequest(error);
   const ip = request.headers.get("CF-Connecting-IP");
-  if (await isRateLimited(env, ip)) return json({ error: "För många förslag från samma adress. Försök igen om en stund." }, { status: 429 });
+  const identity = await rateLimitIdentity(ip, env.RATE_LIMIT_KEY || env.ADMIN_TOKEN);
+  if (ip && !identity) return json({ error: "Rate limit configuration unavailable." }, { status: 503 });
+  if (await isRateLimited(env, identity)) return json({ error: "För många förslag från samma adress. Försök igen om en stund." }, { status: 429 });
   const now = new Date().toISOString();
   await env.DB.prepare(
     `INSERT INTO submissions
@@ -159,7 +177,7 @@ async function handleSubmit(request, env) {
   ).bind(
     body.term.trim(), clean(body.foreslagen_juridisk_definition), clean(body.foreslagen_vardagsbetydelse),
     clean(body.foreslagen_exempel), clean(body.foreslaget_rattsomrade), clean(body.inskickare_namn),
-    clean(body.inskickare_kommentar), now, ip || null
+    clean(body.inskickare_kommentar), now, identity
   ).run();
   return json({ ok: true, message: "Tack, ditt förslag granskas innan det publiceras." }, { status: 201 });
 }
