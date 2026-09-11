@@ -1,0 +1,33 @@
+javascript:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**/*.js"
+          - "scripts/**/*.mjs"
+          - "test/**/*.js"
+          - "package.json"
+
+app:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "public/**"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file: "test/**"
+
+infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "migrations/**"
+          - "wrangler.jsonc"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "bun.lock"
+
+github_actions:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
