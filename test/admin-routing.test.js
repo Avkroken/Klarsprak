@@ -3,76 +3,44 @@ import test from "node:test";
 
 import { adminRoute, isAdminPath } from "../src/index.js";
 
-test("admin pages are exposed only on standardized protected paths", () => {
+test("admin page uses one protected namespace", () => {
   assert.deepEqual(adminRoute("GET", "/admin"), { type: "rewrite", pathname: "/admin.html" });
   assert.deepEqual(adminRoute("GET", "/admin/"), { type: "rewrite", pathname: "/admin.html" });
-  assert.deepEqual(adminRoute("GET", "/admin/critical"), { type: "rewrite", pathname: "/admin.html" });
-  assert.deepEqual(adminRoute("GET", "/admin/critical/"), { type: "rewrite", pathname: "/admin.html" });
   assert.deepEqual(adminRoute("GET", "/admin.html"), { type: "redirect", pathname: "/admin" });
 });
 
-test("normal admin reads rewrite internally to existing handlers", () => {
-  assert.deepEqual(adminRoute("GET", "/admin/api/queue"), {
-    type: "rewrite",
-    pathname: "/api/admin/queue",
-  });
-  assert.deepEqual(adminRoute("GET", "/admin/api/terms"), {
-    type: "rewrite",
-    pathname: "/api/admin/terms",
-  });
+test("all canonical admin APIs rewrite to existing handlers", () => {
+  for (const [method, pathname, internal] of [
+    ["GET", "/admin/api/queue", "/api/admin/queue"],
+    ["GET", "/admin/api/terms", "/api/admin/terms"],
+    ["POST", "/admin/api/review/7", "/api/admin/review/7"],
+    ["PUT", "/admin/api/terms/7", "/api/admin/terms/7"],
+    ["POST", "/admin/api/terms/7/status", "/api/admin/terms/7/status"],
+  ]) {
+    assert.deepEqual(adminRoute(method, pathname), { type: "rewrite", pathname: internal });
+  }
 });
 
-test("critical admin mutations cannot run through normal admin namespace", () => {
-  assert.deepEqual(adminRoute("POST", "/admin/api/review/7"), {
+test("old critical paths redirect to the single admin namespace", () => {
+  assert.deepEqual(adminRoute("GET", "/admin/critical"), {
     type: "redirect",
-    pathname: "/admin/critical/api/review/7",
+    pathname: "/admin",
   });
-  assert.deepEqual(adminRoute("PUT", "/admin/api/terms/7"), {
-    type: "redirect",
-    pathname: "/admin/critical/api/terms/7",
-  });
-  assert.deepEqual(adminRoute("POST", "/admin/api/terms/7/status"), {
-    type: "redirect",
-    pathname: "/admin/critical/api/terms/7/status",
-  });
-});
-
-test("critical namespace rewrites only critical mutations", () => {
   assert.deepEqual(adminRoute("POST", "/admin/critical/api/review/7"), {
-    type: "rewrite",
-    pathname: "/api/admin/review/7",
-  });
-  assert.deepEqual(adminRoute("PUT", "/admin/critical/api/terms/7"), {
-    type: "rewrite",
-    pathname: "/api/admin/terms/7",
-  });
-  assert.deepEqual(adminRoute("POST", "/admin/critical/api/terms/7/status"), {
-    type: "rewrite",
-    pathname: "/api/admin/terms/7/status",
-  });
-  assert.deepEqual(adminRoute("GET", "/admin/critical/api/queue"), {
     type: "redirect",
-    pathname: "/admin/api/queue",
+    pathname: "/admin/api/review/7",
   });
 });
 
-test("legacy admin APIs redirect to the correct Access namespace", () => {
-  assert.deepEqual(adminRoute("GET", "/api/admin/queue"), {
-    type: "redirect",
-    pathname: "/admin/api/queue",
-  });
-  assert.deepEqual(adminRoute("POST", "/api/admin/review/7"), {
-    type: "redirect",
-    pathname: "/admin/critical/api/review/7",
-  });
-  assert.deepEqual(adminRoute("PUT", "/api/admin/terms/7"), {
-    type: "redirect",
-    pathname: "/admin/critical/api/terms/7",
-  });
-  assert.deepEqual(adminRoute("POST", "/api/admin/terms/7/status"), {
-    type: "redirect",
-    pathname: "/admin/critical/api/terms/7/status",
-  });
+test("legacy admin APIs redirect to /admin/api", () => {
+  for (const [method, pathname, target] of [
+    ["GET", "/api/admin/queue", "/admin/api/queue"],
+    ["POST", "/api/admin/review/7", "/admin/api/review/7"],
+    ["PUT", "/api/admin/terms/7", "/admin/api/terms/7"],
+    ["POST", "/api/admin/terms/7/status", "/admin/api/terms/7/status"],
+  ]) {
+    assert.deepEqual(adminRoute(method, pathname), { type: "redirect", pathname: target });
+  }
 });
 
 test("public API paths pass through unchanged", () => {
@@ -84,12 +52,11 @@ test("all admin entry points are marked no-store", () => {
   for (const pathname of [
     "/admin",
     "/admin/",
-    "/admin/critical",
-    "/admin/critical/",
     "/admin.html",
     "/admin/api/queue",
-    "/admin/critical/api/review/7",
     "/api/admin/queue",
+    "/admin/critical",
+    "/admin/critical/api/review/7",
   ]) {
     assert.equal(isAdminPath(pathname), true, pathname);
   }
