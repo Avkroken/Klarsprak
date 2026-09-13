@@ -2,86 +2,49 @@ import app from "./worker.js";
 import { applyResponsePolicy } from "./response-policy.js";
 
 const ADMIN_PAGE = "/admin";
-const CRITICAL_ADMIN_PAGE = "/admin/critical";
 const ADMIN_ASSET = "/admin.html";
 const ADMIN_API_PREFIX = "/admin/api/";
-const CRITICAL_ADMIN_API_PREFIX = "/admin/critical/api/";
 const LEGACY_ADMIN_API_PREFIX = "/api/admin/";
+const LEGACY_CRITICAL_PAGE = "/admin/critical";
+const LEGACY_CRITICAL_API_PREFIX = "/admin/critical/api/";
 
 export function isAdminPath(pathname) {
   return pathname === ADMIN_PAGE
     || pathname === `${ADMIN_PAGE}/`
-    || pathname === CRITICAL_ADMIN_PAGE
-    || pathname === `${CRITICAL_ADMIN_PAGE}/`
     || pathname === ADMIN_ASSET
     || pathname.startsWith(ADMIN_API_PREFIX)
-    || pathname.startsWith(CRITICAL_ADMIN_API_PREFIX)
-    || pathname.startsWith(LEGACY_ADMIN_API_PREFIX);
+    || pathname.startsWith(LEGACY_ADMIN_API_PREFIX)
+    || pathname === LEGACY_CRITICAL_PAGE
+    || pathname === `${LEGACY_CRITICAL_PAGE}/`
+    || pathname.startsWith(LEGACY_CRITICAL_API_PREFIX);
 }
 
-function isCriticalAdminRequest(method, legacyPathname) {
-  const upperMethod = method.toUpperCase();
-
-  if (upperMethod === "POST" && /^\/api\/admin\/review\/[^/]+$/.test(legacyPathname)) {
-    return true;
-  }
-
-  if (upperMethod === "PUT" && /^\/api\/admin\/terms\/[^/]+$/.test(legacyPathname)) {
-    return true;
-  }
-
-  if (upperMethod === "POST" && /^\/api\/admin\/terms\/[^/]+\/status$/.test(legacyPathname)) {
-    return true;
-  }
-
-  return false;
-}
-
-function legacyAdminPath(pathname, prefix) {
-  return `${LEGACY_ADMIN_API_PREFIX}${pathname.slice(prefix.length)}`;
-}
-
-function protectedAdminPath(method, legacyPathname) {
-  const prefix = isCriticalAdminRequest(method, legacyPathname)
-    ? CRITICAL_ADMIN_API_PREFIX
-    : ADMIN_API_PREFIX;
-  return `${prefix}${legacyPathname.slice(LEGACY_ADMIN_API_PREFIX.length)}`;
-}
-
-export function adminRoute(method, pathname) {
+export function adminRoute(_method, pathname) {
   if (pathname === ADMIN_ASSET) {
     return { type: "redirect", pathname: ADMIN_PAGE };
   }
   if (pathname === ADMIN_PAGE || pathname === `${ADMIN_PAGE}/`) {
     return { type: "rewrite", pathname: ADMIN_ASSET };
   }
-  if (pathname === CRITICAL_ADMIN_PAGE || pathname === `${CRITICAL_ADMIN_PAGE}/`) {
-    return { type: "rewrite", pathname: ADMIN_ASSET };
+  if (pathname === LEGACY_CRITICAL_PAGE || pathname === `${LEGACY_CRITICAL_PAGE}/`) {
+    return { type: "redirect", pathname: ADMIN_PAGE };
   }
-  if (pathname.startsWith(CRITICAL_ADMIN_API_PREFIX)) {
-    const legacyPathname = legacyAdminPath(pathname, CRITICAL_ADMIN_API_PREFIX);
-    if (!isCriticalAdminRequest(method, legacyPathname)) {
-      return {
-        type: "redirect",
-        pathname: `${ADMIN_API_PREFIX}${pathname.slice(CRITICAL_ADMIN_API_PREFIX.length)}`,
-      };
-    }
-    return { type: "rewrite", pathname: legacyPathname };
+  if (pathname.startsWith(LEGACY_CRITICAL_API_PREFIX)) {
+    return {
+      type: "redirect",
+      pathname: `${ADMIN_API_PREFIX}${pathname.slice(LEGACY_CRITICAL_API_PREFIX.length)}`,
+    };
   }
   if (pathname.startsWith(ADMIN_API_PREFIX)) {
-    const legacyPathname = legacyAdminPath(pathname, ADMIN_API_PREFIX);
-    if (isCriticalAdminRequest(method, legacyPathname)) {
-      return {
-        type: "redirect",
-        pathname: `${CRITICAL_ADMIN_API_PREFIX}${pathname.slice(ADMIN_API_PREFIX.length)}`,
-      };
-    }
-    return { type: "rewrite", pathname: legacyPathname };
+    return {
+      type: "rewrite",
+      pathname: `${LEGACY_ADMIN_API_PREFIX}${pathname.slice(ADMIN_API_PREFIX.length)}`,
+    };
   }
   if (pathname.startsWith(LEGACY_ADMIN_API_PREFIX)) {
     return {
       type: "redirect",
-      pathname: protectedAdminPath(method, pathname),
+      pathname: `${ADMIN_API_PREFIX}${pathname.slice(LEGACY_ADMIN_API_PREFIX.length)}`,
     };
   }
   return { type: "pass", pathname };
@@ -126,12 +89,7 @@ export default {
       response = await app.fetch(upstreamRequest, env, ctx);
     }
 
-    if (
-      externalUrl.pathname === ADMIN_PAGE
-      || externalUrl.pathname === `${ADMIN_PAGE}/`
-      || externalUrl.pathname === CRITICAL_ADMIN_PAGE
-      || externalUrl.pathname === `${CRITICAL_ADMIN_PAGE}/`
-    ) {
+    if (externalUrl.pathname === ADMIN_PAGE || externalUrl.pathname === `${ADMIN_PAGE}/`) {
       response = injectAdminAccessRouting(response);
     }
 
