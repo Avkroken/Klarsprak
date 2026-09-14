@@ -25,6 +25,14 @@ test("applyResponsePolicy adds all common security headers", async () => {
   assert.equal(await response.text(), "ok");
 });
 
+test("applyResponsePolicy adds X-Robots-Tag when requested", () => {
+  const response = applyResponsePolicy(new Response(null), {
+    robots: "noindex, nofollow",
+  });
+
+  assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
+});
+
 test("applyResponsePolicy overrides cache headers when noStore is requested", () => {
   const response = applyResponsePolicy(new Response(null, {
     headers: { "cache-control": "public, max-age=3600" },
