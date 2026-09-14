@@ -9,11 +9,12 @@ const COMMON_HEADERS = {
   "cross-origin-resource-policy": "same-origin",
 };
 
-export function applyResponsePolicy(response, { noStore = false } = {}) {
+export function applyResponsePolicy(response, { noStore = false, robots = null } = {}) {
   const result = new Response(response.body, response);
   for (const [name, value] of Object.entries(COMMON_HEADERS)) {
     result.headers.set(name, value);
   }
+  if (robots) result.headers.set("x-robots-tag", robots);
   if (noStore) {
     result.headers.set("cache-control", "no-store, max-age=0");
     result.headers.set("pragma", "no-cache");
