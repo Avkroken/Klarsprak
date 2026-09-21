@@ -159,9 +159,30 @@ async function handleTerms(env) {
   return json({ terms: results.map(publicTerm) }, { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=300" } });
 }
 
+async function verifyTurnstile(request, env, token, expectedAction) {
+  if (!env.TURNSTILE_SECRET || !token || typeof token !== "string") return false;
+  const body = new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: token });
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (ip) body.set("remoteip", ip);
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    if (!response.ok) return false;
+    const result = await response.json();
+    const allowed = new Set(String(env.TURNSTILE_HOSTNAMES || "").split(",").map(v => v.trim().toLowerCase()).filter(Boolean));
+    return result.success === true && result.action === expectedAction
+      && typeof result.hostname === "string" && allowed.has(result.hostname.toLowerCase());
+  } catch { return false; }
+}
+
 async function handleSubmit(request, env) {
   let body;
   try { body = await request.json(); } catch { return badRequest("Ogiltig JSON."); }
+  if (!(await verifyTurnstile(request, env, body?.turnstileToken, "term_submit"))) return json({ error: "Turnstile-verifieringen misslyckades. Försök igen." }, { status: 403 });
+  delete body.turnstileToken;
   const error = validateSubmission(body);
   if (error) return badRequest(error);
   const ip = request.headers.get("CF-Connecting-IP");

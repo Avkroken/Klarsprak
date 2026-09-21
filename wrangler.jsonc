@@ -5,6 +5,7 @@
   "compatibility_date": "2026-07-01",
   "workers_dev": false,
   "preview_urls": false,
+  "vars": { "TURNSTILE_HOSTNAMES": "klarsprak.denied.se,xn--klarsprk-g0a.denied.se" },
   "routes": [
     { "pattern": "klarsprak.denied.se", "custom_domain": true },
     { "pattern": "xn--klarsprk-g0a.denied.se", "custom_domain": true }
