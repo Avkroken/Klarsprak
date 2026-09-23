@@ -41,4 +41,4 @@ Vid submissionsproblem: verifiera Turnstile och D1 submission state innan adminf
 
 ## Observability
 
-Behåll query-string-redaction och den centrala samplinggränsen. Lägg inte till externa loggdestinationer eller tail consumers som repo-lokal genväg.
+Behåll query-string-redaction och observability-värdena som deklareras i repositoryts Wrangler-konfiguration. Ändringar av loggdestinationer eller tail consumers ska vara explicita och verifierade.
