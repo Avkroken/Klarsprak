@@ -1,56 +1,78 @@
 # Projektkontext
 
-**Senast verifierad:** 2026-09-23
+**Senast verifierad:** 2026-09-24
 
 ## Ansvar
 
-Klarspråk publicerar källbelagda termer där allmänspråklig betydelse jämförs med institutionell/juridisk användning.
+Klarspråk publicerar källbelagda termer där allmänspråklig betydelse jämförs med institutionell eller juridisk användning.
 
-Publikt innehåll läses från D1. Användarförslag går till granskningskö och blir inte publika automatiskt utan explicit godkännande i adminflödet.
+Systemet har två tydligt skilda flöden:
+
+1. publik läsning av granskade/publicerade termer;
+2. submission → review → explicit publicering.
 
 ## Runtime
 
 `wrangler.jsonc` definierar:
 
-- Worker `klarsprak`
-- entrypoint `src/index.js`
-- domains `klarsprak.denied.se` och IDN-alias
-- assets `public/`
-- D1-binding `DB -> klarsprak-db`
-- `run_worker_first=true`
+- Worker: `klarsprak`
+- entrypoint: `src/index.js`
+- canonical domain: `klarsprak.denied.se`
+- IDN-alias via punycode-route
+- static assets: `public/`
+- Worker-first assetmodell
+- D1-binding: `DB -> klarsprak-db`
 - Turnstile-hostnames
-- persistent observability med query-string-redaction och begränsad sampling
+- persistent observability med query-string-redaction
+- log sampling 0.1 och trace sampling 0.01
 
-## Requestmodell
+## Kodansvar
 
-`src/index.js` hanterar routing runt den underliggande appen:
+### `src/index.js`
 
-- canonical host/alias,
-- admin path rewrite/redirect,
-- SEO metadata och robots policy,
-- response security/cache policy.
+Externa requestpolicyn: canonical host, aliasredirect, adminrouting, SEO/robots och response policy.
 
-`src/worker.js` hanterar bland annat:
+### `src/worker.js`
 
-- `GET /api/terms`
-- `POST /api/submit`
-- admin queue/review
-- publicerade termers uppdatering/status
-- D1-operationer
-- asset fallback
+Applikationslogiken: publika termanrop, submissions, review/adminflöden, D1-operationer och asset fallback.
+
+## Data och state
+
+D1 är canonical applikationsstate för publicerade termer och granskningsflödet.
+
+Frontend eller statiska assets får inte bli en alternativ termdatabas.
 
 ## Publiceringsmodell
 
-Publik startsida beskriver uttryckligen att poster är källbelagda och granskade före publicering. D1 är canonical källa för publicerad termstate.
+Submission och publicering är separata operationer. Ett inkommet förslag blir inte publikt utan explicit review/publiceringsövergång.
 
-Förslagsflödet kräver Turnstile och ska förbli separerat från adminens godkännande/publicering.
+Detta är en funktionell och säkerhetsmässig invariant, inte bara en UI-detalj.
 
 ## Package/runtime
 
-Projektet använder JavaScript ES modules och Wrangler. `package.json` har scripts för dev, test, deploy, remote D1 migration och produktionsverifiering.
+Projektet använder JavaScript ES modules och Wrangler.
 
-`package-lock.json` saknas; använd därför inte `npm ci` som om repositoryt hade ett låst npm-lockfile.
+`package.json` tillhandahåller:
+
+- `npm run dev`
+- `npm test`
+- `npm run deploy`
+- `npm run migrate:production`
+- `npm run verify:production`
+
+Repositoryt saknar `package-lock.json`; använd därför `npm install`, inte `npm ci`, tills en låst npm-installationsmodell uttryckligen införs.
+
+## Dokumentationsgräns
+
+Det här dokumentet beskriver repo-specifik current-state som kan verifieras från repositoryts publika kod och konfiguration. Organisationsgemensam governance eller privata driftuppgifter hör inte hemma här.
 
 ## Uppdateringskontrakt
 
-Uppdatera dokumentationen när publiceringsmodell, admin/API-routes, D1-schema, canonical host, Turnstilegräns eller deploymentmodell ändras.
+Uppdatera denna fil när följande ändras:
+
+- publicerings-/reviewmodell,
+- admin- eller API-routes,
+- D1-schema eller state ownership,
+- canonical host/alias,
+- Turnstile-gräns,
+- deployment- eller runtimekonfiguration.
