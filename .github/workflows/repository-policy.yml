@@ -1,0 +1,81 @@
+name: Repository policy
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+        with:
+          base-ref: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || '' }}
+          head-ref: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || '' }}
+          retry-on-snapshot-warnings: true
+          retry-on-snapshot-warnings-timeout: 300
+
+  application:
+    name: Node and Cloudflare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Enforce Cloudflare free-plan observability guardrails
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, pathlib, re, sys
+          def strip(s):
+              s=re.sub(r'/\*.*?\*/','',s,flags=re.S)
+              s=re.sub(r'(^|\s)//.*',r'\1',s)
+              return re.sub(r',\s*([}\]])',r'\1',s)
+          errors=[]
+          for path in pathlib.Path('.').rglob('wrangler*.jsonc'):
+              if '.git' in path.parts or 'node_modules' in path.parts: continue
+              c=json.loads(strip(path.read_text()))
+              o=c.get('observability') or {}
+              logs=o.get('logs') or {}; traces=o.get('traces') or {}
+              if o.get('enabled') is not True: errors.append(f"{path}: observability.enabled must be true")
+              if o.get('redact_query_string') is not True: errors.append(f"{path}: redact_query_string must be true")
+              if float(logs.get('head_sampling_rate',o.get('head_sampling_rate',1))) > 0.10: errors.append(f"{path}: log sampling exceeds 10%")
+              if float(traces.get('head_sampling_rate',1)) > 0.01: errors.append(f"{path}: trace sampling exceeds 1%")
+              if c.get('tail_consumers') or logs.get('destinations') or traces.get('destinations'): errors.append(f"{path}: external observability destinations are not allowed")
+          if errors:
+              print('\n'.join('::error::'+e for e in errors)); sys.exit(1)
+          PY
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+      - name: Install, test and validate Worker
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npm test
+          npx wrangler deploy --dry-run
+
+  policy:
+    name: Repository policy
+    if: ${{ always() }}
+    needs: [dependency-review, application]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          DEPENDENCY_REVIEW: ${{ needs.dependency-review.result }}
+          APPLICATION: ${{ needs.application.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for result in "$DEPENDENCY_REVIEW" "$APPLICATION"; do
+            [[ "$result" == "success" ]] || { echo "::error::Required job failed: $result"; exit 1; }
+          done
