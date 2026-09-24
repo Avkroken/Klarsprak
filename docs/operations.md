@@ -13,6 +13,7 @@ Repositoryt har inget `package-lock.json`, så `npm ci` är inte den verifierade
 
 ```bash
 npm test
+npx wrangler d1 migrations apply DB --local
 npx wrangler deploy --dry-run
 ```
 
