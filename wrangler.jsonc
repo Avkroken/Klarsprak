@@ -22,8 +22,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "klarsprak-db",
-      "database_id": "a8117d9d-a65d-430d-a8a2-9b4ef3fd9e2f"
+      "database_name": "klarsprak-db-eu",
+      "database_id": "7891c6c7-0d4b-4e23-b2d8-d3eaaabdcfce"
     }
   ],
   "observability": {
