@@ -21,7 +21,7 @@ Systemet har två tydligt skilda flöden:
 - IDN-alias via punycode-route
 - static assets: `public/`
 - Worker-first assetmodell
-- D1-binding: `DB -> klarsprak-db`
+- D1-binding: `DB -> klarsprak-db-eu`
 - Turnstile-hostnames
 - persistent observability med query-string-redaction
 - log sampling 0.1 och trace sampling 0.01
@@ -37,6 +37,8 @@ Externa requestpolicyn: canonical host, aliasredirect, adminrouting, SEO/robots 
 Applikationslogiken: publika termanrop, submissions, review/adminflöden, D1-operationer och asset fallback.
 
 ## Data och state
+
+Produktionsbindingen `DB` ska peka på en D1-databas skapad med Cloudflare-jurisdiction `eu`. Repositoryts Worker-kod använder D1 Sessions API för D1-routes; read replication kan därför vara aktiverad på EU-databasen utan att frångå sequential-consistency-kontraktet.
 
 D1 är canonical applikationsstate för publicerade termer och granskningsflödet.
 
