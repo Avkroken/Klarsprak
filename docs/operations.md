@@ -34,6 +34,18 @@ Regler:
 - verifiera migrationsordning och kompatibilitet med aktuell Worker-kod;
 - uppdatera project-context när state ownership eller schemaansvar ändras.
 
+## D1 data locality och read replication
+
+Produktionsdatabasen ska skapas med `jurisdiction=eu`. Cloudflare-jurisdiction är creation-time providerkonfiguration och kan inte läggas till på en befintlig D1-databas; replacement görs därför genom verifierad export/import till en ny EU-databas före binding-cutover.
+
+Klarspråks D1-requestväg använder Sessions API. Read replication får därför vara `auto` på EU-databasen; replikerna hålls inom den konfigurerade EU-jurisdictionen.
+
+Produktionsmigrationer ska gå via bindingen:
+
+```bash
+npm run migrate:production
+```
+
 ## Deployment
 
 ```bash
