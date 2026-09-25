@@ -24,7 +24,7 @@ src/worker.js
   |            \
   |             +--> ASSETS (public/)
   |
-  +--> D1 klarsprak-db
+  +--> D1 klarsprak-db-eu
         +--> publicerade termer
         +--> submissions / review state
 ```
