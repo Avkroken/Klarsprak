@@ -52,4 +52,4 @@ Adminflödet läser granskningskö och utför explicita stateövergångar för r
 
 ## Wiki
 
-GitHub Wiki är aktiverad och bör användas som lättnavigerad presentationsyta när sidorna publiceras. Versionsstyrd Markdown i repositoryt är underlaget; unik current-state ska inte ligga enbart i Wiki.
+Om GitHub Wiki används kan den fungera som lättnavigerad presentationsyta. Versionsstyrd Markdown i repositoryt är underlaget; unik current-state ska inte ligga enbart i Wiki.
