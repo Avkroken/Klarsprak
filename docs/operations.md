@@ -46,6 +46,10 @@ Produktionsmigrationer ska gå via bindingen:
 npm run migrate:production
 ```
 
+## Code scanning
+
+Klarspråk använder GitHub CodeQL Default Setup. Lägg inte till en lokal `.github/workflows/codeql.yml` om repositoryt inte uttryckligen ska byta till Advanced Setup.
+
 ## Deployment
 
 ```bash
