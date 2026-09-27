@@ -9,6 +9,7 @@ Navigationssida för Klarspråks tekniska dokumentation.
 | Vad ansvarar tjänsten för och vilken runtime gäller? | [Projektkontext](project-context.md) |
 | Hur fungerar Worker, assets, D1 och publiceringsflödet? | [Arkitektur](architecture.md) |
 | Hur utvecklar, migrerar, verifierar och deployar jag? | [Drift](operations.md) |
+| Hur versionssätter och publicerar vi releases? | [Release- och versionsstandard](release-standard.md) |
 | Hur rapporteras säkerhetsproblem? | [SECURITY.md](../SECURITY.md) |
 
 ## Systemöversikt
