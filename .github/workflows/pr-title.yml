@@ -45,6 +45,7 @@ jobs:
               "feat:",
               "Feat: add reviewed term",
               "feat( ): add reviewed term",
+              "feat(): add reviewed term",
           )
 
           for fixture in valid:
