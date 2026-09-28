@@ -48,7 +48,7 @@ npm run migrate:production
 
 ## Code scanning
 
-Klarspråk använder GitHub CodeQL Default Setup. Lägg inte till en lokal `.github/workflows/codeql.yml` om repositoryt inte uttryckligen ska byta till Advanced Setup.
+Klarspråk använder repositoryägd GitHub CodeQL Advanced Setup via `.github/workflows/codeql.yml` för GitHub Actions och JavaScript/TypeScript. Workflown kör på push/PR mot `main`, merge queue och schemalagd analys. Ändra inte code-scanning-modellen eller required checks som workaround för en failing PR; verifiera provider-state separat när governance berörs.
 
 ## Deployment
 
