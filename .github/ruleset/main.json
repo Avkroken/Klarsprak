@@ -18,15 +18,19 @@
         "do_not_enforce_on_create": false,
         "required_status_checks": [
           {
-            "context": "Dependency review",
+            "context": "test",
             "integration_id": 15368
           },
           {
-            "context": "Node and Cloudflare",
+            "context": "dependency-review",
             "integration_id": 15368
           },
           {
-            "context": "Conventional PR title",
+            "context": "Analyze (actions)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Analyze (javascript-typescript)",
             "integration_id": 15368
           }
         ]
