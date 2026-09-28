@@ -13,3 +13,13 @@
 - Publika förslag får inte bli publicerade utan granskningssteget.
 - Kör tester och Wrangler dry-run före merge.
 - Lägg aldrig secrets eller känslig admin-/authorizationkonfiguration i repository eller publik dokumentation.
+## Agent skills
+
+### Issue tracker
+
+Use this repository's GitHub Issues for issues and specifications. Read `docs/agents/issue-tracker.md` before reading, creating, or publishing tickets.
+
+### Domain docs
+
+Use the single-context convention in `docs/agents/domain.md`; existing project-context, architecture, operations, and ADR documentation remain authoritative.
+
