@@ -115,21 +115,18 @@ En releaseprocess får inte kringgå normala PR-checks eller repositoryskydd.
 
 ## Releaseautomation — current state
 
-Current `main` har ingen verifierad Release Please- eller motsvarande release-PR-workflow.
+Repositoryt använder `.github/workflows/release.yml` och de repoägda hjälpskripten under `.github/scripts/` för SemVer-baserad GitHub Release-publicering.
 
-Full releaseautomation aktiveras inte i detta arbete.
+- vanliga pull requests validerar releasekonfigurationen utan publiceringsbehörighet;
+- publicering körs endast från `main`;
+- automatiskt bumpbeslut bygger på Conventional Commit-information i first-parent-historiken;
+- manuella körningar kan välja explicit bump eller prerelease/promotion;
+- release-jobbet väntar på repositoryts verifieringschecks innan publicering;
+- GitHub Release/tagg är versionspunkten och utlöser inte produktionsmigration eller Worker-deploy;
+- publicerade taggar flyttas eller skrivs inte om;
+- standard-`GITHUB_TOKEN` används med jobbspecifik least-privilege i stället för nya PAT:ar.
 
-En framtida release-PR-modell måste bevara:
-
-- normal CI/review på release-PR:n;
-- least-privilege write-identitet;
-- inga nya onödiga PAT:ar;
-- ingen utökning av read-only GitHub App-integrationer till release-write;
-- ingen koppling som automatiskt kör produktionsmigration eller deployment enbart därför att en release-PR mergas.
-
-Standard-`GITHUB_TOKEN`-beteende och efterföljande workflowtriggers måste verifieras mot aktuell GitHub-dokumentation innan automation införs.
-
-Historiska Releases som har skapats av `gamnacken[bot]` bevisar inte current write-permission och används därför inte som grund för en ny write-arkitektur.
+Releaseflödet ska faila stängt vid divergerande tagghistorik, saknade releaseankare, failing checks eller osäker promotion. Ändringar i releasearkitekturen ska verifieras i vanlig PR och får inte användas för att försvaga repositoryskydd.
 
 ## Prerelease
 
