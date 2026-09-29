@@ -44,6 +44,12 @@ D1 är canonical applikationsstate för publicerade termer och granskningsflöde
 
 Frontend eller statiska assets får inte bli en alternativ termdatabas.
 
+## Tema
+
+Klarspråks tidigare systemstyrda light/dark-palett är `legacy` och fortsatt fallback. Därutöver finns `forest` (visas som **Avkroken**) och `blackout`. Temana ändrar ytor och färgtokens men inte innehållsmodell, typografi eller skillnaden mellan allmänspråk och institutionell användning.
+
+Valet följer Avkrokens presentationskontrakt `localStorage["avkroken.theme"]` och `avkroken_theme` på denied.se. Temapreferensen är kosmetisk och får aldrig påverka adminauthorization, Turnstile eller publiceringsstate.
+
 ## Publiceringsmodell
 
 Submission och publicering är separata operationer. Ett inkommet förslag blir inte publikt utan explicit review/publiceringsövergång.
