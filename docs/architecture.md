@@ -67,6 +67,10 @@ Adminytan arbetar mot review-state. Godkännande/publicering är explicita state
 - **Worker → D1:** canonical application state.
 - **Worker → ASSETS:** presentation, aldrig auktoritet för termdata.
 
+## Klientkod och CSP
+
+Publik applikationslogik och adminlogik ligger i separata first-party assets (`/app.js` respektive `/admin.js`) i stället för inline-script. Response-CSP tillåter därför inte generell inline-JavaScript. Turnstile är den enda externa script/frame-originen som explicit tillåts och är avgränsad till `https://challenges.cloudflare.com`.
+
 ## Caching och indexering
 
 Publika indexerbara sidor får canonical/robots metadata. Admin- och andra icke-publika ytor ska inte bli indexerbara eller cacheas som allmän publik data.

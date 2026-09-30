@@ -76,7 +76,7 @@ Verifiera att API:t läser publicerad data från D1 och att frontend återger sa
 
 ### Submission
 
-Verifiera validering, Turnstile och att ett förslag hamnar i review-state utan automatisk publicering.
+Verifiera validering, Turnstile och att ett förslag hamnar i review-state utan automatisk publicering. Response-CSP ska explicit tillåta `https://challenges.cloudflare.com` för Turnstiles script/frame och ska inte återinföra `'unsafe-inline'` för `script-src`.
 
 ### Admin/review
 
