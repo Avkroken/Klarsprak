@@ -20,7 +20,7 @@ export function isAdminPath(pathname) {
     || pathname.startsWith(LEGACY_CRITICAL_API_PREFIX);
 }
 
-export function adminRoute(_method, pathname) {
+export function adminRoute(pathname) {
   if (pathname === ADMIN_ASSET) {
     return { type: "redirect", pathname: ADMIN_PAGE };
   }
@@ -113,7 +113,7 @@ function decorateHtml(response, { injectAdminRouting = false, seo = null } = {})
 export default {
   async fetch(request, env, ctx) {
     const externalUrl = new URL(request.url);
-    const route = adminRoute(request.method, externalUrl.pathname);
+    const route = adminRoute(externalUrl.pathname);
     const seo = seoForPath(externalUrl.pathname);
     let response;
 
