@@ -1,3 +1,35 @@
+:root[data-theme="legacy"] {
+  color-scheme: dark;
+  --paper: #04070e; --bg: #04070e;
+  --raised: #09101e; --card: #09101e;
+  --ink: #f5f3ee; --text: #f5f3ee;
+  --muted: #91a8c6; --line: rgba(137,167,207,.22);
+  --ordinary: #ff438b; --ordinary-bg: rgba(213,29,203,.10); --ordinary-line: rgba(255,67,139,.36);
+  --institution: #69bbff; --institution-bg: rgba(45,155,255,.11); --institution-line: rgba(45,155,255,.34);
+  --accent: #24e7e8; --accent-bg: rgba(36,231,232,.08);
+  --gap: rgba(119,87,255,.09); --gap-line: rgba(119,87,255,.34);
+  --warn: #ff438b; --warn-bg: rgba(213,29,203,.10);
+  --focus: #24e7e8; --danger: #ff438b;
+}
+:root[data-theme="legacy"] body {
+  background:
+    radial-gradient(circle at 14% 8%, rgba(36,231,232,.11), transparent 27rem),
+    radial-gradient(circle at 86% 18%, rgba(213,29,203,.10), transparent 30rem),
+    radial-gradient(circle at 50% 100%, rgba(45,155,255,.08), transparent 35rem),
+    linear-gradient(180deg, #050912 0%, #03060c 100%);
+}
+:root[data-theme="legacy"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, #000, transparent 82%);
+}
 :root[data-theme="forest"] {
   color-scheme: dark;
   --paper: #080b09; --bg: #080b09;

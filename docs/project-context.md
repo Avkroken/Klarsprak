@@ -46,7 +46,7 @@ Frontend eller statiska assets får inte bli en alternativ termdatabas.
 
 ## Tema
 
-Klarspråks tidigare systemstyrda light/dark-palett är `legacy` och fortsatt fallback. Därutöver finns `forest` (visas som **Avkroken**) och `blackout`. Temana ändrar ytor och färgtokens men inte innehållsmodell, typografi eller skillnaden mellan allmänspråk och institutionell användning.
+`legacy` är det äldre Avkroken-uttrycket och fortsatt fallback: mörk bas, cyan/blå/violett/magenta glow och diskret 42 px-rutnät. Därutöver finns `forest` (visas som **Avkroken**) och `blackout`. Klarspråk behåller sin egen typografi och den semantiska skillnaden mellan allmänspråk och institutionell användning; temana ändrar endast presentationslagrets ytor och färgtokens.
 
 Valet följer Avkrokens presentationskontrakt `localStorage["avkroken.theme"]` och `avkroken_theme` på denied.se. Temapreferensen är kosmetisk och får aldrig påverka adminauthorization, Turnstile eller publiceringsstate.
 
