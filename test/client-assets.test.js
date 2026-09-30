@@ -16,8 +16,8 @@ test("public and admin application code is served as external first-party assets
 
   assert.match(index, /<script src="\/app\.js" defer><\/script>/);
   assert.match(admin, /<script src="\/admin\.js" defer><\/script>/);
-  assert.doesNotMatch(index, /<script>(?:.|\n)*?<\/script>/);
-  assert.doesNotMatch(admin, /<script>(?:.|\n)*?<\/script>/);
+  assert.doesNotMatch(index, /<script>(?:.|\n)*?<\/script>/i);
+  assert.doesNotMatch(admin, /<script>(?:.|\n)*?<\/script>/i);
   assert.match(app, /loadTerms\(\)/);
   assert.match(adminApp, /async function loadAll\(\)/);
 });
