@@ -69,7 +69,7 @@ Adminytan arbetar mot review-state. Godkännande/publicering är explicita state
 
 ## Klientkod och CSP
 
-Publik applikationslogik och adminlogik ligger i separata first-party assets (`/app.js` respektive `/admin.js`) i stället för inline-script. Response-CSP tillåter därför inte generell inline-JavaScript. Turnstile är den enda externa script/frame-originen som explicit tillåts och är avgränsad till `https://challenges.cloudflare.com`.
+Publik applikationslogik och adminlogik ligger i separata first-party assets (`/app.js` respektive `/admin.js`) i stället för inline-script. Response-CSP tillåter därför inte generell inline-JavaScript. `script-src` får en unik nonce per response; Cloudflare kan då bära samma nonce på sin edge-injicerade JavaScript Detection-snippet utan att `'unsafe-inline'` återinförs. Turnstile är den enda externa script/frame-originen som explicit tillåts och är avgränsad till `https://challenges.cloudflare.com`.
 
 ## Caching och indexering
 

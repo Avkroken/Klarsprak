@@ -1,5 +1,4 @@
 const COMMON_HEADERS = {
-  "content-security-policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
   "strict-transport-security": "max-age=31536000; includeSubDomains",
   "x-content-type-options": "nosniff",
   "x-frame-options": "DENY",
@@ -9,8 +8,25 @@ const COMMON_HEADERS = {
   "cross-origin-resource-policy": "same-origin",
 };
 
+function contentSecurityPolicy(nonce) {
+  return [
+    "default-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    `script-src 'self' 'nonce-${nonce}' https://challenges.cloudflare.com`,
+    "connect-src 'self' https://challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com",
+    "img-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+  ].join("; ");
+}
+
 export function applyResponsePolicy(response, { noStore = false, robots = null } = {}) {
   const result = new Response(response.body, response);
+  const nonce = crypto.randomUUID().replaceAll("-", "");
+  result.headers.set("content-security-policy", contentSecurityPolicy(nonce));
   for (const [name, value] of Object.entries(COMMON_HEADERS)) {
     result.headers.set(name, value);
   }

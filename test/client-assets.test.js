@@ -22,12 +22,15 @@ test("public and admin application code is served as external first-party assets
   assert.match(adminApp, /async function loadAll\(\)/);
 });
 
-test("CSP avoids inline script execution and explicitly allows Turnstile", () => {
-  const response = applyResponsePolicy(new Response(null));
-  const csp = response.headers.get("content-security-policy") || "";
+test("CSP uses a nonce and explicitly allows Turnstile without unsafe-inline scripts", () => {
+  const first = applyResponsePolicy(new Response(null));
+  const second = applyResponsePolicy(new Response(null));
+  const firstCsp = first.headers.get("content-security-policy") || "";
+  const secondCsp = second.headers.get("content-security-policy") || "";
 
-  assert.match(csp, /script-src 'self' https:\/\/challenges\.cloudflare\.com/);
-  assert.match(csp, /frame-src https:\/\/challenges\.cloudflare\.com/);
-  assert.match(csp, /connect-src 'self' https:\/\/challenges\.cloudflare\.com/);
-  assert.doesNotMatch(csp, /script-src[^;]*'unsafe-inline'/);
+  assert.match(firstCsp, /script-src 'self' 'nonce-[a-f0-9]{32}' https:\/\/challenges\.cloudflare\.com/);
+  assert.match(firstCsp, /frame-src https:\/\/challenges\.cloudflare\.com/);
+  assert.match(firstCsp, /connect-src 'self' https:\/\/challenges\.cloudflare\.com/);
+  assert.doesNotMatch(firstCsp, /script-src[^;]*'unsafe-inline'/);
+  assert.notEqual(firstCsp, secondCsp);
 });
