@@ -124,7 +124,7 @@ Repositoryt använder `.github/workflows/release.yml` och de repoägda hjälpskr
 - release-jobbet väntar på repositoryts verifieringschecks innan publicering;
 - GitHub Release/tagg är versionspunkten och utlöser inte produktionsmigration eller Worker-deploy;
 - publicerade taggar flyttas eller skrivs inte om;
-- standard-`GITHUB_TOKEN` används med jobbspecifik least-privilege i stället för nya PAT:ar.
+- canonical releasepublication använder standard-`GITHUB_TOKEN` med jobbspecifik least-privilege; endast det valfria rådgivande Copilot-jobbet använder separat read-only `COPILOT_GITHUB_TOKEN`.
 
 Releaseflödet ska faila stängt vid divergerande tagghistorik, saknade releaseankare, failing checks eller osäker promotion. Ändringar i releasearkitekturen ska verifieras i vanlig PR och får inte användas för att försvaga repositoryskydd.
 
@@ -151,3 +151,11 @@ Publicerade taggar flyttas eller skrivs inte om. Vid felaktig release:
 5. kör migration/deployment endast om den korrigerade ändringen faktiskt ska till produktion.
 
 Ingen force-push eller tag history rewrite används.
+
+## Copilot-sammanfattning
+
+Releaseflödet kör den SHA-pinnade `github/copilot-release-notes`-actionen i ett separat read-only-jobb med `contents: read` och `pull-requests: read`. Copilot CLI installeras i exakt version `1.0.90` i ett separat steg som inte får `COPILOT_GITHUB_TOKEN`, så actionen använder den redan installerade binären i stället för att hämta en flytande CLI-version. Tokenen exponeras endast för steget som kontrollerar om integrationen är aktiverad och för själva action-steget.
+
+`COPILOT_GITHUB_TOKEN` ska vara en least-privilege fine-grained PAT med `Copilot Requests: Read` och en tokenägare med aktiv Copilot-licens. Workflown skapar eller roterar ingen credential. Om secreten saknas eller Copilot-genereringen misslyckas påverkas inte releaseprocessen.
+
+Copilot-resultatet publiceras endast i GitHub Actions run summary som rådgivande text. Det skrivs inte in i den kanoniska GitHub Release-body:n. SemVer, release-target, required checks och release notes i GitHub Release fortsätter därför att komma enbart från `semantic_release.py`; osäkra eller ofullständiga AI-resultat kan aldrig ändra canonical changelog. Upstream v1.0.3 kan dessutom missa rebase-mergade PR:er; Copilot-resultatet får därför inte användas som bevis på full release-täckning.
