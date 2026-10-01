@@ -154,7 +154,7 @@ Ingen force-push eller tag history rewrite används.
 
 ## Copilot-sammanfattning
 
-Releaseflödet kör den SHA-pinnade `github/copilot-release-notes`-actionen i ett separat read-only-jobb med `contents: read` och `pull-requests: read`. Copilot CLI förinstalleras i exakt version `1.0.90` innan `COPILOT_GITHUB_TOKEN` exponeras, så actionen använder den redan installerade binären i stället för att hämta en flytande CLI-version.
+Releaseflödet kör den SHA-pinnade `github/copilot-release-notes`-actionen i ett separat read-only-jobb med `contents: read` och `pull-requests: read`. Copilot CLI installeras i exakt version `1.0.90` i ett separat steg som inte får `COPILOT_GITHUB_TOKEN`, så actionen använder den redan installerade binären i stället för att hämta en flytande CLI-version. Tokenen exponeras endast för steget som kontrollerar om integrationen är aktiverad och för själva action-steget.
 
 `COPILOT_GITHUB_TOKEN` ska vara en least-privilege fine-grained PAT med `Copilot Requests: Read` och en tokenägare med aktiv Copilot-licens. Workflown skapar eller roterar ingen credential. Om secreten saknas eller Copilot-genereringen misslyckas påverkas inte releaseprocessen.
 
