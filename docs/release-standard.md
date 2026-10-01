@@ -124,7 +124,7 @@ Repositoryt använder `.github/workflows/release.yml` och de repoägda hjälpskr
 - release-jobbet väntar på repositoryts verifieringschecks innan publicering;
 - GitHub Release/tagg är versionspunkten och utlöser inte produktionsmigration eller Worker-deploy;
 - publicerade taggar flyttas eller skrivs inte om;
-- standard-`GITHUB_TOKEN` används med jobbspecifik least-privilege i stället för nya PAT:ar.
+- canonical releasepublication använder standard-`GITHUB_TOKEN` med jobbspecifik least-privilege; endast det valfria rådgivande Copilot-jobbet använder separat read-only `COPILOT_GITHUB_TOKEN`.
 
 Releaseflödet ska faila stängt vid divergerande tagghistorik, saknade releaseankare, failing checks eller osäker promotion. Ändringar i releasearkitekturen ska verifieras i vanlig PR och får inte användas för att försvaga repositoryskydd.
 
