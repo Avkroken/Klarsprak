@@ -37,8 +37,8 @@ README är avsiktligt kort; detaljerna ligger under `docs/`.
 
 Provider-/credentialförutsättningar verifieras utan att exportera eller skriva secretvärden:
 
-\`\`\`bash
+```bash
 bash scripts/setup-provider-credentials.sh
-\`\`\`
+```
 
 Wizarden är human-only och skapar eller roterar inga credentials.
