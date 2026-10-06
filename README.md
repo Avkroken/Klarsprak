@@ -32,3 +32,13 @@ README är avsiktligt kort; detaljerna ligger under `docs/`.
 - `src/index.js` måste köras före assets så att host-, admin-, SEO- och response-policy inte kan kringgås.
 - submission och publicering är separata stateövergångar.
 - publikt innehåll kommer från D1; statisk HTML är inte canonical termdatabas.
+
+## Operator-wizard
+
+Provider-/credentialförutsättningar verifieras utan att exportera eller skriva secretvärden:
+
+\`\`\`bash
+bash scripts/setup-provider-credentials.sh
+\`\`\`
+
+Wizarden är human-only och skapar eller roterar inga credentials.
