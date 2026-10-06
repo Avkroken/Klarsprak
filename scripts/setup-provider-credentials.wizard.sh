@@ -196,7 +196,7 @@ say "Verifiera de credentialnamn som faktiskt skyddar admin- och submissionflöd
 open_url "https://dash.cloudflare.com/"
 step "Öppna Workers & Pages → klarsprak → Settings och verifiera ADMIN_TOKEN och TURNSTILE_SECRET utan att visa eller kopiera värden."
 step "RATE_LIMIT_KEY är valfri. Om den saknas använder runtime ADMIN_TOKEN som HMAC-nyckel för rate-limit-identitet; dokumentera detta som avsiktlig fallback i stället för att skapa en ny secret bara för wizarden."
-step "Verifiera TURNSTILE_HOSTNAMES mot canonical host klarsprak.denied.se och IDN-aliasets avsedda submissionbeteende."
+step "Verifiera att TURNSTILE_HOSTNAMES tillåter canonical host klarsprak.denied.se. IDN-aliaset ska redirecta till canonical host innan submission och behöver därför inte vara en separat Turnstile-host."
 if ! confirm "Är admin-/Turnstile-konfigurationen närvarande och är eventuell RATE_LIMIT_KEY-state avsiktlig?"; then
   warn "Runtime credential-state är inte ens konfigurationsmässigt verifierad."
   exit 2
