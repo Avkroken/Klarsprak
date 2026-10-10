@@ -109,3 +109,11 @@ Kontrollera auth/route före dataändringar. Försök inte lösa accessproblem g
 ## Observability
 
 Persistent logs/traces är aktiverade med sampling och query-string-redaction. Redaction ska behållas även under felsökning; lägg inte känsliga requestparametrar i loggar.
+
+## Portable GitHub automation ownership
+
+The repository uses GitHub's current `github.repository` for API routing instead of assuming a fixed account. For GitHub **organizations**, configure the repository or inherited organization Actions variable `AUTO_ASSIGN_USER` to an individual collaborator if automatic assignment is wanted. The organization name is never used as an issue assignee.
+
+Configure the exact trusted principals in Actions variables `TRUSTED_AGENT_USER_LOGIN`, `TRUSTED_AGENT_BOT_LOGIN`, `TRUSTED_DEPENDABOT_LOGIN`, and `TRUSTED_COPILOT_BOT_LOGIN` before enabling autonomous agent post-merge dispatch, bot PR processing and issue delegation. Missing configuration disables only the privileged action; it does not silently authorize other accounts. Provider-independent workflows may still run without those variables.
+
+After a fork or ownership transfer, verify GitHub App installations, GitHub Actions permissions, required independent review, rulesets and external credentials **for the new owner**. Neither a fork nor an ownership transfer grants access to the former owner's accounts. Do not hardcode former account logins into automation scripts.
